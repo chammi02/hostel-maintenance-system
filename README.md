@@ -1,138 +1,273 @@
-# Hostel Maintenance Request Management System (නේවාසිකාගාර නඩත්තු කළමනාකරණ පද්ධතිය)
+# Hostel Maintenance Request Management System
 
-> **Final Year Project Codebase & Comprehensive Viva Documentation**  
-> Technologies: **Python, Java (Spring Boot), HTML5, CSS3, JavaScript, MySQL**  
-> Based directly on the provided **Activity Swimlane Diagram** and **State Transition Diagram**.
-
----
-
-## 📌 1. Project Overview (පද්ධතිය පිළිබඳ හැඳින්වීම)
-
-The **Hostel Maintenance Request Management System** is a full-stack web application developed to automate and streamline facility maintenance and repair workflows within university or college hostels. It replaces manual paper logbooks and informal verbal complaints with a digital, transparent, role-based tracking platform.
-
-### 5 System Roles (පද්ධතියේ පරිශීලක වර්ග 5)
-1. **🎓 Student (ශිෂ්‍යයා)**: Submits complaints with problem category, detailed description, exact room location, and uploaded photos of damaged items. Tracks live status and views scheduled repair appointments.
-2. **🛡️ Sub Warden / Warden (උප වාර්ඩන්)**: Reviews incoming complaints, approves or rejects unauthorized requests, assigns appropriate technicians (e.g., Electrician, Carpenter, Plumber), and relays scheduled repair appointments to students.
-3. **⚡ Maintenance Worker (නඩත්තු සේවකයා / කාර්මිකයා)**: Views assigned work orders, sets available repair dates and time slots, updates work progress, and marks jobs as completed upon testing.
-4. **⚙️ Administrator (පද්ධති පරිපාලක)**: Full user management (CRUD) across all roles, assigns technician trades/skills, monitors system uptime and maintenance KPIs.
-5. **👤 Guest User (අමුත්තා)**: Views public hostel maintenance rules, emergency contacts, announcements, and accesses the student registration form.
+> **Final Year Project Codebase & Comprehensive Technical Documentation**  
+> **Technologies:** Python (Flask), Java (Spring Boot), HTML5, CSS3, JavaScript, MySQL  
+> **Architecture:** Complies strictly with the Activity Swimlane Diagram and State Machine Lifecycle.
 
 ---
 
-## 📊 2. UML Diagrams Implementation Mapping
+## 📌 1. Project Overview
+
+The **Hostel Maintenance Request Management System** is an automated web platform designed to streamline and digitize facility maintenance, problem reporting, and repair scheduling within university or college hostels.
+
+It replaces inefficient paper logbooks and manual complaints with a transparent, role-based digital tracking platform connecting students, hostel administration, and technical staff.
+
+### The 5 System User Roles:
+1. **🎓 Student**:
+   - Logs in securely and accesses the student dashboard.
+   - Submits maintenance complaints specifying problem category (electrical, carpentry, plumbing, etc.), room/hostel location, priority, and problem description.
+   - Attaches and uploads photographs of damaged fixtures.
+   - Tracks complaint status in real-time and views scheduled repair appointment dates and time slots.
+2. **🛡️ Sub Warden / Warden**:
+   - Reviews incoming student complaints (`UNDER_REVIEW`).
+   - Evaluates complaints against hostel policy and rejects unauthorized requests (e.g., unauthorized private appliances) with a documented reason (`REJECTED`).
+   - Assigns legitimate complaints to appropriate skilled maintenance technicians (Electrician, Carpenter, Plumber) (`ASSIGNED`).
+   - Confirms repair schedules submitted by workers and relays appointment details to students.
+3. **⚡ Maintenance Worker (Technicians - Electrician, Carpenter, Plumber)**:
+   - Accesses assigned work orders filtered by their specific trade/specialty.
+   - Inspects work requirements and proposes scheduled repair dates and time slots (`SCHEDULED`).
+   - Adds technical preparation notes (e.g., required parts, tools).
+   - Updates progress and marks tasks as completed upon testing and verification (`COMPLETED`).
+4. **⚙️ System Administrator**:
+   - Manages user accounts across all 5 roles (Create, Read, Update, Delete - CRUD).
+   - Assigns technical trades and specialties to maintenance staff.
+   - Monitors overall hostel maintenance KPIs, request volumes, and system health.
+5. **👤 Guest User**:
+   - Browses public hostel rules, maintenance guidelines, and official announcements.
+   - Registers for a new student or guest account via the self-registration portal.
+
+---
+
+## 📊 2. UML Diagram Implementation & Workflow Mapping
 
 ### A. Activity Diagram (Swimlane Flow)
-As specified in your swimlane diagram, the workflow is distributed across 4 distinct actors:
+The workflow follows a 4-swimlane structure matching the operational actors:
+
 ```
-+---------------+---------------+-------------------+-----------------------+
-|    Student    |    System     |    Sub Warden     |  Maintenance Workers  |
-+---------------+---------------+-------------------+-----------------------+
-|  1. Login     |               |                   |                       |
-|  2. Enter U/P | 3. Validates  |                   |                       |
-|  4. Dashboard |               |                   |                       |
-|  5. Submit Req| 6. Saves Req  |                   |                       |
-|               |               | 7. Views Req      |                       |
-|               |               | 8. Assigns Staff  |                       |
-|               |               |                   | 9. Views Assigned Req |
-|               |               |                   | 10. Sets Date & Time  |
-|               |               | 11. Relays Sched  |                       |
-| 12. Views Sched|              |                   |                       |
-+---------------+---------------+-------------------+-----------------------+
++-------------------+-------------------+-----------------------+-----------------------+
+|      Student      |      System       |      Sub Warden       |  Maintenance Workers  |
++-------------------+-------------------+-----------------------+-----------------------+
+|  1. Login         |                   |                       |                       |
+|  2. Enter U/P     | 3. Validates Cred |                       |                       |
+|  4. View Dashboard|                   |                       |                       |
+|  5. Submit Request| 6. Saves Request  |                       |                       |
+|     (Photo+Loc)   |    (PENDING_REV)  | 7. Reviews Request    |                       |
+|                   |                   | 8. Assigns Worker     |                       |
+|                   |                   |    (By Specialty)     | 9. Views Work Order   |
+|                   |                   |                       | 10. Sets Date & Time  |
+|                   |                   | 11. Relays Schedule   |                       |
+| 12. Views Schedule|                   |     to Student        |                       |
++-------------------+-------------------+-----------------------+-----------------------+
 ```
 
 ### B. State Machine Diagram (Request Lifecycle)
-The request moves strictly through the states specified in your state diagram:
-* `PENDING_REVIEW`: Initial state upon submission.
-* `UNDER_REVIEW`: Sub Warden inspects request details and uploaded photo.
-* `REJECTED`: Sub Warden rejects policy-violating requests (e.g., unauthorized AC/heater) with a written reason.
-* `ASSIGNED`: Sub Warden assigns request to a carpenter, electrician, plumber, etc.
-* `SCHEDULED`: Maintenance worker provides exact inspection date and time slot.
-* `COMPLETED`: Maintenance worker finishes repair, records notes, and verifies fix.
+Requests transition strictly through discrete states:
+
+```
+  [Start] 
+     │
+     ▼
+[PENDING_REVIEW] ──(Rejected by Warden with Reason)──► [REJECTED] ──► [End]
+     │
+     │ (Warden inspects request details & photo)
+     ▼
+[UNDER_REVIEW]
+     │
+     │ (Warden assigns to Electrician/Carpenter/Plumber)
+     ▼
+ [ASSIGNED]
+     │
+     │ (Worker provides repair date and time slot)
+     ▼
+ [SCHEDULED]
+     │
+     │ (Worker executes and verifies repair work)
+     ▼
+ [COMPLETED] ──► [End]
+```
+
+* **`PENDING_REVIEW`**: Initial state immediately upon submission by a student.
+* **`UNDER_REVIEW`**: Sub Warden opens and reviews the complaint details and uploaded photo.
+* **`REJECTED`**: Sub Warden declines the request due to policy violation (with official reason recorded).
+* **`ASSIGNED`**: Sub Warden delegates the job to a qualified technician based on problem category.
+* **`SCHEDULED`**: Maintenance technician books an exact appointment date and time window.
+* **`COMPLETED`**: Technician concludes the repair, records completion notes, and marks the task finished.
 
 ---
 
-## 🗄️ 3. Database Schema (MySQL - `database/schema.sql`)
+## 🗄️ 3. Database Architecture (MySQL)
 
-### Tables:
-1. `users`: Stores login credentials, role (`student`, `warden`, `worker`, `admin`, `guest`), trade (`electrician`, `carpenter`, `plumber`, etc.), contact details, and assigned hostel block/room.
-2. `maintenance_requests`: Primary transaction table recording request code, student FK, category, title, description, location, photo path, priority, status enum, assigned worker FK, scheduled date, time slot, and completion remarks.
-3. `request_status_history`: Audit trail table logging who changed what state and when.
-4. `hostel_announcements`: Public notices visible to students and guest users.
+The relational schema is configured in `database/schema.sql` (or `setup_db.sql`):
 
----
+### 1. `users` Table
+Stores authentication and profile information for all 5 roles:
+* `id` (INT, Primary Key, Auto Increment)
+* `username` (VARCHAR 50, Unique, Not Null)
+* `password` / `password_hash` (VARCHAR 255, Not Null)
+* `full_name` (VARCHAR 100, Not Null)
+* `role` (ENUM: `'student'`, `'warden'`, `'worker'`, `'admin'`, `'guest'`)
+* `worker_trade` (ENUM / VARCHAR: `'electrician'`, `'carpenter'`, `'plumber'`, `'mason'`, `'general'`, `'none'`)
+* `phone` (VARCHAR 20)
+* `hostel_block` (VARCHAR 50)
+* `room_no` / `room_number` (VARCHAR 50)
+* `status` (ENUM: `'active'`, `'inactive'`)
 
-## 🚀 4. Step-by-Step Setup & Execution (පද්ධතිය ක්‍රියාත්මක කරන ආකාරය)
+### 2. `requests` / `maintenance_requests` Table
+Core transaction table tracking the repair lifecycle:
+* `id` (INT, Primary Key, Auto Increment)
+* `request_code` (VARCHAR 30, Unique)
+* `student_id` (INT, Foreign Key referencing `users.id`)
+* `category` (ENUM: `'electrical'`, `'carpentry'`, `'plumbing'`, `'furniture'`, `'masonry'`, `'other'`)
+* `title` (VARCHAR 150, Not Null)
+* `description` (TEXT, Not Null)
+* `location` / `room_no` (VARCHAR 100, Not Null)
+* `photo` / `photo_path` (VARCHAR 255, Stores uploaded image path)
+* `priority` (ENUM: `'low'`, `'medium'`, `'high'`, `'emergency'`)
+* `status` (ENUM: `'PENDING_REVIEW'`, `'UNDER_REVIEW'`, `'ASSIGNED'`, `'SCHEDULED'`, `'COMPLETED'`, `'REJECTED'`)
+* `assigned_worker_id` (INT, Foreign Key referencing `users.id`)
+* `assigned_by_warden_id` (INT, Foreign Key referencing `users.id`)
+* `rejection_reason` (TEXT)
+* `scheduled_date` (DATE / VARCHAR)
+* `scheduled_time` (VARCHAR 50)
+* `worker_notes` (TEXT)
+* `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
 
-### Option 1: Standalone Instant Demo (No Installation Required)
-For instant testing or presenting during viva:
-1. Navigate to the `frontend/` directory.
-2. Open `login.html` directly in any web browser (Google Chrome, Edge, Firefox).
-3. Click any of the **1-Click Demo Fill buttons** (Student, Sub Warden, Electrician, Carpenter, Admin, Guest).
-4. The system includes an automatic local storage engine that replicates all backend and database workflows instantly!
-
-### Option 2: Running with Python Backend
-1. **Database Setup**:
-   - Start MySQL (e.g., via XAMPP Control Panel).
-   - Open phpMyAdmin or MySQL CLI and run the script:
-     ```sql
-     SOURCE /path/to/database/schema.sql;
-     ```
-2. **Start Python Server**:
-   ```bash
-   cd backend-python
-   pip install -r requirements.txt
-   python app.py
-   ```
-   *The server runs at `http://127.0.0.1:5000` (automatically connects to MySQL or falls back gracefully to local SQLite).*
-
-### Option 3: Running with Java Spring Boot Backend
-1. Ensure JDK 17+ and Maven are installed.
-2. Configure your MySQL credentials in `backend-java/src/main/resources/application.properties`.
-3. Build and launch:
-   ```bash
-   cd backend-java
-   mvn spring-boot:run
-   ```
-   *The Spring Boot server runs at `http://localhost:8080`.*
+### 3. `hostel_announcements` Table
+Stores public guidelines and notices displayed on the guest portal.
 
 ---
 
-## 🇱🇰 5. Detailed Sinhala Explanation (සිංහල භාෂාවෙන් සවිස්තරාත්මක පැහැදිලි කිරීම)
+## 📁 4. Project Directory Structure
 
-මෙම ව්‍යාපෘතිය (Hostel Maintenance Request Management System) විශ්වවිද්‍යාල හෝ උසස් අධ්‍යාපන ආයතන වල නේවාසිකාගාර නඩත්තු කටයුතු කාර්යක්ෂමව පවත්වාගෙන යාම සඳහා නිර්මාණය කරන ලද්දකි.
-
-### 1. පද්ධතියේ ප්‍රධාන පරිශීලකයින් 5 දෙනා (5 System Roles):
-1. **ශිෂ්‍යයා (Student)**: නේවාසිකාගාරයේ පවතින විදුලි, වඩු, ජලනල හෝ වෙනත් කැඩීම්/බිඳීම් පිළිබඳ විස්තර, ඡායාරූප (Photo Upload) සහ කාමර අංකය ඇතුළත් කර Maintenance Request එකක් ඉදිරිපත් කරයි.
-2. **උප වාර්ඩන් (Sub Warden)**: ශිෂ්‍යයා එවූ Request එක පරීක්ෂා කර බලා (Under Review), එය නේවාසිකාගාර නීතිවලට එකඟ නම් සුදුසු කාර්මිකයාට (Electrician / Carpenter / Plumber) පවරයි (Assign). නීති විරෝධී නම් Reject කරයි.
-3. **නඩත්තු කාර්මිකයා (Maintenance Worker)**: තමන්ට පවරා ඇති වැඩ පරීක්ෂා කර, අලුත්වැඩියාව සඳහා පැමිණෙන දිනය සහ වේලාව (Date & Time) උප වාර්ඩන් හරහා ශිෂ්‍යයා වෙත දැනුම් දෙයි. අලුත්වැඩියාව අවසන් වූ පසු Completed ලෙස සලකුණු කරයි.
-4. **පරිපාලක (Administrator)**: පද්ධතියේ සියලුම Users (Students, Wardens, Workers) එකතු කිරීම, වෙනස් කිරීම සහ ඉවත් කිරීම සිදු කරයි.
-5. **අමුත්තා (Guest User)**: ලියාපදිංචි නොවූ අයට නේවාසිකාගාර නීති, නිවේදන සහ Register වීමේ පහසුකම ලබා දෙයි.
-
-### 2. Activity Diagram එක Code එක සමඟ සම්බන්ධ වන ආකාරය:
-* **Student Swimlane**: ශිෂ්‍යයා Login වී Dashboard එකට ගොස් `submit-request-form` එක හරහා විස්තර හා photo එකක් submit කරයි.
-* **System Swimlane**: පද්ධතිය දත්ත Database එකේ `maintenance_requests` table එකට ඇතුළත් කර එහි Status එක `PENDING_REVIEW` බවට පත් කරයි.
-* **Sub Warden Swimlane**: උප වාර්ඩන් Login වී pending requests පරීක්ෂා කර, සුදුසු කාර්මිකයා තෝරා Assign කරයි.
-* **Maintenance Worker Swimlane**: කාර්මිකයා තමන්ගේ Dashboard එකෙන් request එක බලා "Set Date & Time" මඟින් දිනයක් හා වේලාවක් නියම කරයි.
-* මෙම දිනය හා වේලාව ක්ෂණිකව ශිෂ්‍යයාගේ Dashboard එකෙහි "📅 Scheduled Appointment" ලෙස දිස්වේ.
-
-### 3. State Diagram එක ක්‍රියාත්මක වන ආකාරය (Status Lifecycle):
-1. `PENDING_REVIEW`: ශිෂ්‍යයා request එක submit කළ සැණින් ලැබෙන මුල් අවස්ථාව.
-2. `UNDER_REVIEW`: උප වාර්ඩන් එය පරීක්ෂා කිරීම ආරම්භ කරන විට.
-3. `REJECTED`: නීති විරෝධී ඉල්ලීමක් නම් හේතුවක් (Reason) සහිතව ප්‍රතික්ෂේප කිරීම.
-4. `ASSIGNED`: සුදුසු කාර්මිකයෙකුට (Worker) වැඩේ පැවරූ පසු.
-5. `SCHEDULED`: කාර්මිකයා වැඩ කරන දිනය හා වේලාව (Date & Time) ඇතුළත් කළ පසු.
-6. `COMPLETED`: අලුත්වැඩියා කටයුත්ත සාර්ථකව අවසන් කළ පසු.
+```
+c:\hostel-maintenance-system\
+├── setup_db.sql                    # Quick MySQL setup script for XAMPP
+├── README.md                       # Comprehensive project documentation
+├── simple-app/                     # Beginner-Friendly Unified Stack (Flask + MySQL)
+│   ├── app.py                      # Flask server handling all routes, auth & MySQL queries
+│   ├── RUN_PROJECT.bat             # 1-Click launcher script
+│   ├── static/
+│   │   ├── style.css               # Clean responsive styling
+│   │   └── uploads/                # Storage directory for student damage photos
+│   └── templates/
+│       ├── index.html              # Guest portal & hostel maintenance rules
+│       ├── login.html              # Login screen with 1-click test credentials
+│       ├── student.html            # Student dashboard (Photo upload & schedule viewer)
+│       ├── warden.html             # Sub Warden portal (Review, reject & assign)
+│       ├── worker.html             # Technician portal (Date/time booking & completion)
+│       └── admin.html              # Administrator dashboard (User management)
+├── frontend/                       # Standalone Modern Web UI (HTML5, CSS3, JS)
+│   ├── index.html                  # Guest portal
+│   ├── login.html                  # Unified login
+│   ├── register.html               # Registration form
+│   ├── student-dashboard.html      # Advanced student dashboard
+│   ├── warden-dashboard.html       # Advanced warden dashboard
+│   ├── worker-dashboard.html       # Advanced worker dashboard
+│   ├── admin-dashboard.html        # Advanced admin dashboard
+│   ├── css/style.css               # Master stylesheet with status badges & modals
+│   └── js/api.js                   # API client with automatic browser mock fallback
+├── backend-python/                 # Modular Python REST API backend
+│   ├── app.py                      # RESTful endpoints with CORS & upload support
+│   ├── config.py                   # Configuration parameters
+│   ├── database.py                 # PyMySQL connector with SQLite fallback
+│   └── requirements.txt            # Python dependencies
+├── backend-java/                   # Enterprise Java Spring Boot Backend
+│   ├── pom.xml                     # Maven project configuration (JPA, MySQL)
+│   └── src/main/
+│       ├── resources/application.properties
+│       └── java/com/hostel/maintenance/
+│           ├── HostelApplication.java
+│           ├── model/              # JPA Entities (User, MaintenanceRequest, Status)
+│           ├── repository/         # Spring Data Repositories
+│           └── controller/         # REST Controllers
+└── database/
+    └── schema.sql                  # Full production MySQL schema with audit tables
+```
 
 ---
 
-## 🔑 Demo Login Accounts (පරීක්ෂා කිරීම සඳහා ගිණුම්)
-සියලුම ගිණුම් සඳහා පෙරනිමි මුරපදය (Default Password): `password123`
+## 🚀 5. How to Setup and Run the Project
 
-| Role | Username | Purpose |
-|---|---|---|
-| **Student** | `student_kasun` | කාමර 204 හි ශිෂ්‍යයා (ඉල්ලීම් ඉදිරිපත් කිරීම හා දිනය බැලීම) |
-| **Sub Warden** | `subwarden` | ඉල්ලීම් පරීක්ෂා කිරීම, ප්‍රතික්ෂේප කිරීම හා assign කිරීම |
-| **Electrician** | `electrician_kamal` | විදුලි කාර්මිකයා (දිනය හා වේලාව ලබා දීම) |
-| **Carpenter** | `carpenter_nimal` | වඩු කාර්මිකයා (මේස, දොර ජනෙල් අලුත්වැඩියාව) |
-| **Administrator** | `admin` | සියලුම පරිශීලකයින් කළමනාකරණය |
-| **Guest** | `guest_user` | තොරතුරු බැලීම හා ලියාපදිංචිය |
+### Prerequisites:
+* **XAMPP** (Apache & MySQL)
+* **Python 3.10+** (with `flask` and `pymysql` installed)
+
+---
+
+### Step 1: Start XAMPP MySQL & Apache
+1. Open the **XAMPP Control Panel**.
+2. Click **Start** for both **Apache** (Port 80) and **MySQL** (Port 3306).
+3. Ensure both indicators turn green.
+
+### Step 2: Import Database in phpMyAdmin
+1. Open your web browser and navigate to `http://localhost/phpmyadmin`.
+2. Click the **SQL** tab in the top navigation bar.
+3. Open `c:\hostel-maintenance-system\setup_db.sql` in a text editor, copy its contents, paste them into the SQL window, and click **Go**.
+4. The database `hostel_db` will be created with all tables and pre-loaded test accounts.
+
+### Step 3: Run the Application
+
+#### Option A: 1-Click Launch (Recommended for Viva/Testing)
+1. Navigate to `c:\hostel-maintenance-system\simple-app`.
+2. Double-click `RUN_PROJECT.bat`.
+3. Open your browser and visit:  
+   👉 **`http://127.0.0.1:5000`**
+
+#### Option B: Terminal Launch
+```powershell
+cd c:\hostel-maintenance-system\simple-app
+pip install flask pymysql
+python app.py
+```
+Visit `http://127.0.0.1:5000` in your web browser.
+
+#### Option C: Standalone Frontend Demo (No Server Required)
+1. Navigate to `c:\hostel-maintenance-system\frontend`.
+2. Double-click `login.html` to open it in Chrome, Edge, or Firefox.
+3. The interface will operate immediately using its built-in browser state storage!
+
+---
+
+## 🔑 6. Demo Accounts & Credentials
+
+All test accounts share the standard password: **`123`** *(or `password123` in the advanced frontend)*.
+
+| Role | Username | Full Name | Trade / Purpose |
+|---|---|---|---|
+| **Student** | `kasun` | Kasun Perera | Resident of Room 204; submits complaints & checks appointments |
+| **Sub Warden** | `warden` | Dr. Sunil Perera | Inspects requests, approves/rejects, assigns technicians |
+| **Electrician** | `kamal` | Kamal Bandara | Maintenance staff (Electrical repairs; sets date & time) |
+| **Carpenter** | `nimal` | Nimal Silva | Maintenance staff (Carpentry repairs; sets date & time) |
+| **Admin** | `admin` | System Administrator | Oversees all user accounts & system metrics |
+| **Guest** | `guest` | Guest Applicant | Browses public guidelines & hostel rules |
+
+> **Viva Tip:** On `http://127.0.0.1:5000/login`, you can use the **1-Click Fast Fill buttons** to immediately populate credentials for any role during your presentation without typing.
+
+---
+
+## 🎤 7. Viva / Oral Presentation Defense Guide
+
+When presenting this project to your examiners, structure your answers as follows:
+
+### Q1: Why did you choose Python Flask for this project?
+**Answer:**  
+*"Flask is a lightweight, clean, and highly readable micro-framework. It provides full control over HTTP routing, sessions, and multipart file uploads without the heavy boilerplate code of enterprise Java frameworks. This ensures rapid performance, clean architecture, and easy maintainability for a hostel management portal."*
+
+### Q2: How does the system handle image uploads?
+**Answer:**  
+*"When a student submits a problem report with an attached photo, the form uses `enctype="multipart/form-data"`. The Flask backend retrieves the file via `request.files`, validates the extension, stores the physical image under `static/uploads/`, and saves the file reference path in the MySQL `requests.photo` column. The Sub Warden and technician can then inspect the photo before visiting the room."*
+
+### Q3: How is role-based access control (RBAC) enforced?
+**Answer:**  
+*"Upon successful login, user credentials are verified against the MySQL `users` table. The authenticated user's `id`, `full_name`, and `role` are stored securely in the Flask `session`. Each dashboard route (e.g., `/student`, `/warden`, `/worker`, `/admin`) checks `session.get('role')`. If an unauthorized role attempts access, they are automatically redirected to the login view."*
+
+### Q4: How do the Activity and State Machine diagrams connect?
+**Answer:**  
+*"The Activity Swimlane diagram governs the sequential interactions between the 4 actors: Student submits, System stores as `PENDING_REVIEW`, Sub Warden reviews and assigns moving it to `ASSIGNED`, Worker schedules an appointment moving it to `SCHEDULED`, which is relayed back to the student. If the Sub Warden finds an unauthorized appliance, it transitions directly to `REJECTED`."*
+
+---
+
+## 📄 8. License & Authorship
+
+Developed as a Final Year Project for academic evaluation.  
+All code, database schemas, and documentation are designed for academic and educational purposes.
