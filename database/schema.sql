@@ -115,8 +115,8 @@ INSERT INTO users (id, username, email, password_hash, role, full_name, phone, h
 (3, 'electrician_kamal', 'kamal@hostel.ac.lk', 'password123', 'worker', 'Kamal Bandara (Electrician)', '+94 76 333 4455', 'Maintenance Dept', 'M-01', 'electrician', 'active'),
 (4, 'carpenter_nimal', 'nimal@hostel.ac.lk', 'password123', 'worker', 'Nimal Silva (Carpenter)', '+94 75 444 5566', 'Maintenance Dept', 'M-02', 'carpenter', 'active'),
 (5, 'plumber_saman', 'saman@hostel.ac.lk', 'password123', 'worker', 'Saman Kumara (Plumber)', '+94 78 555 6677', 'Maintenance Dept', 'M-03', 'plumber', 'active'),
-(6, 'student_kasun', 'kasun@student.ac.lk', 'password123', 'student', 'Kasun Jayawardena', '+94 70 666 7788', 'Block A', 'Room 204', 'none', 'active'),
-(7, 'student_amaya', 'amaya@student.ac.lk', 'password123', 'student', 'Amaya Wickramasinghe', '+94 72 777 8899', 'Block B', 'Room 112', 'none', 'active'),
+(6, 'student_kasun', 'kasun@student.ac.lk', 'password123', 'student', 'Kasun Jayawardena', '+94 70 666 7788', 'Block G', 'U112', 'none', 'active'),
+(7, 'student_amaya', 'amaya@student.ac.lk', 'password123', 'student', 'Amaya Wickramasinghe', '+94 72 777 8899', 'Block A', 'D113', 'none', 'active'),
 (8, 'guest_user', 'guest@visitor.ac.lk', 'password123', 'guest', 'Guest Visitor / Applicant', '+94 77 888 9900', 'N/A', 'N/A', 'none', 'active');
 
 -- Sample Initial Maintenance Requests matching each state

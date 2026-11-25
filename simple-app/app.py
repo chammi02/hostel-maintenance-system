@@ -38,34 +38,132 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 SQLITE_DB_PATH = os.path.join(BASE_DIR, 'hostel_db.sqlite3')
 
 # -----------------------------------------------------------------------------
-# Database Connection Manager (MySQL with automatic SQLite Fallback)
+# Database Connection Manager (Direct MySQL with Automatic Fallback)
 # -----------------------------------------------------------------------------
-USE_MYSQL = False
+USE_MYSQL = True
 
-def check_db_mode():
+def init_mysql_db():
+    """Ensure MySQL hostel_db tables, columns, and seed users exist."""
     global USE_MYSQL
     if not PYMYSQL_AVAILABLE:
         USE_MYSQL = False
-        return
+        return False
     try:
         conn = pymysql.connect(
             host='localhost',
             user='root',
             password='',         # Default XAMPP MySQL password is empty
+            port=3306,
+            autocommit=True
+        )
+        with conn.cursor() as cur:
+            cur.execute("CREATE DATABASE IF NOT EXISTS hostel_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+        conn.close()
+
+        conn = pymysql.connect(
+            host='localhost',
+            user='root',
+            password='',
             database='hostel_db',
             port=3306,
             cursorclass=pymysql.cursors.DictCursor,
-            connect_timeout=2
+            autocommit=True
         )
+        with conn.cursor() as cur:
+            # 1. Create users table
+            cur.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    username VARCHAR(50) UNIQUE NOT NULL,
+                    email VARCHAR(100) DEFAULT '',
+                    password VARCHAR(50) NOT NULL,
+                    full_name VARCHAR(100) NOT NULL,
+                    role ENUM('student', 'warden', 'worker', 'admin', 'guest') NOT NULL,
+                    worker_trade VARCHAR(50) DEFAULT 'none',
+                    phone VARCHAR(20),
+                    room_no VARCHAR(50)
+                ) ENGINE=InnoDB
+            ''')
+
+            # 2. Create requests table
+            cur.execute('''
+                CREATE TABLE IF NOT EXISTS requests (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    student_id INT NOT NULL,
+                    student_name VARCHAR(100),
+                    room_no VARCHAR(50),
+                    category VARCHAR(50),
+                    title VARCHAR(150),
+                    description TEXT,
+                    photo VARCHAR(255),
+                    status ENUM('PENDING_REVIEW', 'UNDER_REVIEW', 'ASSIGNED', 'SCHEDULED', 'COMPLETED', 'REJECTED') DEFAULT 'PENDING_REVIEW',
+                    assigned_worker_id INT NULL,
+                    worker_name VARCHAR(100) NULL,
+                    scheduled_date VARCHAR(50) NULL,
+                    scheduled_time VARCHAR(50) NULL,
+                    rejection_reason TEXT NULL,
+                    rating INT NULL,
+                    student_feedback TEXT NULL,
+                    completed_at VARCHAR(50) NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB
+            ''')
+
+            # Ensure all columns exist in MySQL tables
+            cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(100) DEFAULT '' AFTER username")
+            cur.execute("ALTER TABLE requests ADD COLUMN IF NOT EXISTS rating INT NULL")
+            cur.execute("ALTER TABLE requests ADD COLUMN IF NOT EXISTS student_feedback TEXT NULL")
+            cur.execute("ALTER TABLE requests ADD COLUMN IF NOT EXISTS completed_at VARCHAR(50) NULL")
+
+            # Remove obsolete guest login accounts
+            cur.execute("DELETE FROM users WHERE role = 'guest' OR username IN ('guest', 'guest_user')")
+
+            # Ensure demo accounts exist in MySQL (including Plumber Saman)
+            seed_users = [
+                ('kasun', 'kasun@student.ac.lk', '123', 'Kasun Perera (Student)', 'student', 'none', '0771112233', 'Room 204'),
+                ('student_kasun', 'student@hostel.ac.lk', 'password123', 'Kasun Perera (Student)', 'student', 'none', '0771112233', 'Room 204'),
+                ('warden', 'warden@hostel.ac.lk', '123', 'Dr. Sunil (Sub Warden)', 'warden', 'none', '0712223344', 'Office'),
+                ('subwarden', 'subwarden@hostel.ac.lk', 'password123', 'Dr. Sunil (Sub Warden)', 'warden', 'none', '0712223344', 'Office'),
+                ('kamal', 'kamal@hostel.ac.lk', '123', 'Kamal Bandara (Electrician)', 'worker', 'electrician', '0763334455', 'Workshop'),
+                ('electrician_kamal', 'electrician@hostel.ac.lk', 'password123', 'Kamal Bandara (Electrician)', 'worker', 'electrician', '0763334455', 'Workshop'),
+                ('nimal', 'nimal@hostel.ac.lk', '123', 'Nimal Silva (Carpenter)', 'worker', 'carpenter', '0754445566', 'Workshop'),
+                ('carpenter_nimal', 'carpenter@hostel.ac.lk', 'password123', 'Nimal Silva (Carpenter)', 'worker', 'carpenter', '0754445566', 'Workshop'),
+                ('saman', 'saman@hostel.ac.lk', '123', 'Saman Kumara (Plumber)', 'worker', 'plumber', '0785556677', 'Workshop'),
+                ('plumber_saman', 'plumber@hostel.ac.lk', 'password123', 'Saman Kumara (Plumber)', 'worker', 'plumber', '0785556677', 'Workshop'),
+                ('admin', 'admin@hostel.ac.lk', '123', 'System Administrator', 'admin', 'none', '0779998877', 'HQ')
+            ]
+            for u in seed_users:
+                cur.execute("SELECT id FROM users WHERE username = %s", (u[0],))
+                row = cur.fetchone()
+                if not row:
+                    cur.execute('''
+                        INSERT INTO users (username, email, password, full_name, role, worker_trade, phone, room_no)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    ''', u)
+                else:
+                    cur.execute("UPDATE users SET email = %s, worker_trade = %s, full_name = %s WHERE id = %s", (u[1], u[5], u[3], row['id']))
+
+            # Initial sample request if empty
+            cur.execute("SELECT COUNT(*) as cnt FROM requests")
+            if cur.fetchone()['cnt'] == 0:
+                cur.execute('''
+                    INSERT INTO requests (student_id, student_name, room_no, category, title, description, status, assigned_worker_id, worker_name, scheduled_date, scheduled_time)
+                    VALUES (1, 'Kasun Perera (Student)', 'Room 204', 'electrical', 'Ceiling Fan Sparking & Speed Issue', 'Fan makes sparks and stops rotating on speed 3.', 'SCHEDULED', 3, 'Kamal Bandara (Electrician)', '2026-11-28', '10:00 AM')
+                ''')
+
         conn.close()
         USE_MYSQL = True
-        print("[DATABASE] Successfully connected to XAMPP MySQL database (hostel_db)!")
+        print("[DATABASE] Successfully connected and synchronized with XAMPP MySQL (hostel_db)!")
+        return True
     except Exception as e:
         USE_MYSQL = False
-        print(f"[DATABASE] MySQL not available ({e}). Using local SQLite database (hostel_db.sqlite3)!")
+        print(f"[DATABASE WARNING] MySQL not reachable ({e}). Using SQLite fallback!")
+        return False
 
-# Initialize SQLite database if MySQL is not being used
+# Initialize SQLite database as backup only
 def init_sqlite_db():
+    if not SQLITE_AVAILABLE:
+        return
     conn = sqlite3.connect(SQLITE_DB_PATH)
     cursor = conn.cursor()
     cursor.execute('''
@@ -97,89 +195,46 @@ def init_sqlite_db():
             scheduled_date TEXT,
             scheduled_time TEXT,
             rejection_reason TEXT,
+            rating INTEGER DEFAULT NULL,
+            student_feedback TEXT DEFAULT '',
+            completed_at TEXT DEFAULT '',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-
-    # Ensure email column exists
-    try:
-        cursor.execute("ALTER TABLE users ADD COLUMN email TEXT DEFAULT ''")
-    except Exception:
-        pass
-
-    # Ensure rating & feedback columns exist in requests table
-    for col in [
-        ("rating", "INTEGER DEFAULT NULL"),
-        ("student_feedback", "TEXT DEFAULT ''"),
-        ("completed_at", "TEXT DEFAULT ''")
-    ]:
-        try:
-            cursor.execute(f"ALTER TABLE requests ADD COLUMN {col[0]} {col[1]}")
-        except Exception:
-            pass
-
-    # Ensure all demo accounts exist with both 123 and password123 aliases
-    seed_users = [
-        # (username, email, password, full_name, role, trade, phone, room)
-        ('kasun', 'kasun@student.ac.lk', '123', 'Kasun Perera (Student)', 'student', 'none', '0771112233', 'Room 204'),
-        ('student_kasun', 'student@hostel.ac.lk', 'password123', 'Kasun Perera (Student)', 'student', 'none', '0771112233', 'Room 204'),
-        ('warden', 'warden@hostel.ac.lk', '123', 'Dr. Sunil (Sub Warden)', 'warden', 'none', '0712223344', 'Office'),
-        ('subwarden', 'subwarden@hostel.ac.lk', 'password123', 'Dr. Sunil (Sub Warden)', 'warden', 'none', '0712223344', 'Office'),
-        ('kamal', 'kamal@hostel.ac.lk', '123', 'Kamal Bandara (Electrician)', 'worker', 'electrician', '0763334455', 'Workshop'),
-        ('electrician_kamal', 'electrician@hostel.ac.lk', 'password123', 'Kamal Bandara (Electrician)', 'worker', 'electrician', '0763334455', 'Workshop'),
-        ('nimal', 'nimal@hostel.ac.lk', '123', 'Nimal Silva (Carpenter)', 'worker', 'carpenter', '0754445566', 'Workshop'),
-        ('carpenter_nimal', 'carpenter@hostel.ac.lk', 'password123', 'Nimal Silva (Carpenter)', 'worker', 'carpenter', '0754445566', 'Workshop'),
-        ('saman', 'saman@hostel.ac.lk', '123', 'Saman Kumara (Plumber)', 'worker', 'plumber', '0785556677', 'Workshop'),
-        ('plumber_saman', 'plumber@hostel.ac.lk', 'password123', 'Saman Kumara (Plumber)', 'worker', 'plumber', '0785556677', 'Workshop'),
-        ('admin', 'admin@hostel.ac.lk', '123', 'System Administrator', 'admin', 'none', '0779998877', 'HQ')
-    ]
-
-    # Remove any guest login accounts from users table (guest users do not sign in)
-    try:
-        cursor.execute("DELETE FROM users WHERE role = 'guest' OR username IN ('guest', 'guest_user')")
-    except Exception:
-        pass
-
-    for u in seed_users:
-        cursor.execute("SELECT id FROM users WHERE username = ?", (u[0],))
-        row = cursor.fetchone()
-        if not row:
-            cursor.execute('''
-                INSERT INTO users (username, email, password, full_name, role, worker_trade, phone, room_no)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', u)
-        else:
-            cursor.execute("UPDATE users SET email = ? WHERE id = ?", (u[1], row[0]))
-
-    # Seed initial sample request if empty
-    cursor.execute("SELECT COUNT(*) FROM requests")
-    if cursor.fetchone()[0] == 0:
-        cursor.execute('''
-            INSERT INTO requests (student_id, student_name, room_no, category, title, description, status, assigned_worker_id, worker_name, scheduled_date, scheduled_time)
-            VALUES (1, 'Kasun Perera (Student)', 'Room 204', 'electrical', 'Ceiling Fan Sparking & Speed Issue', 'Fan makes sparks and stops rotating on speed 3.', 'SCHEDULED', 5, 'Kamal Bandara (Electrician)', '2026-11-15', '10:00 AM')
-        ''')
     conn.commit()
     conn.close()
 
-# Unified database query helper
+# Unified database query helper - PRIORITIZES MYSQL
 def db_query(sql, params=(), one=False, all=False, commit=False):
-    if USE_MYSQL:
-        conn = pymysql.connect(
-            host='localhost',
-            user='root',
-            password='',
-            database='hostel_db',
-            port=3306,
-            cursorclass=pymysql.cursors.DictCursor,
-            autocommit=True
-        )
-        with conn.cursor() as cursor:
-            cursor.execute(sql, params)
-            res = cursor.fetchone() if one else (cursor.fetchall() if all else None)
-        conn.close()
-        return res
-    else:
-        # SQLite helper (converts %s to ?)
+    global USE_MYSQL
+    if PYMYSQL_AVAILABLE:
+        try:
+            conn = pymysql.connect(
+                host='localhost',
+                user='root',
+                password='',
+                database='hostel_db',
+                port=3306,
+                cursorclass=pymysql.cursors.DictCursor,
+                autocommit=True,
+                connect_timeout=3
+            )
+            with conn.cursor() as cursor:
+                cursor.execute(sql, params)
+                if commit:
+                    last_id = cursor.lastrowid
+                    conn.close()
+                    USE_MYSQL = True
+                    return last_id
+                res = cursor.fetchone() if one else (cursor.fetchall() if all else None)
+            conn.close()
+            USE_MYSQL = True
+            return res
+        except Exception as err:
+            print(f"[DATABASE] MySQL query error ({err}). Falling back to SQLite...")
+
+    # SQLite fallback
+    if SQLITE_AVAILABLE:
         conn = sqlite3.connect(SQLITE_DB_PATH)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
@@ -196,11 +251,10 @@ def db_query(sql, params=(), one=False, all=False, commit=False):
             if one:
                 return dict(res)
             return [dict(row) for row in res]
-        return None
+    return None
 
-# Check database on startup
-check_db_mode()
-if not USE_MYSQL:
+# Run initialization
+if not init_mysql_db():
     init_sqlite_db()
 
 # -----------------------------------------------------------------------------

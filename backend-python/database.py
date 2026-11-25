@@ -96,8 +96,8 @@ def init_db():
                 ('electrician_kamal', 'kamal@hostel.ac.lk', 'password123', 'worker', 'Kamal Bandara (Electrician)', '+94 76 333 4455', 'Maintenance Dept', 'M-01', 'electrician'),
                 ('carpenter_nimal', 'nimal@hostel.ac.lk', 'password123', 'worker', 'Nimal Silva (Carpenter)', '+94 75 444 5566', 'Maintenance Dept', 'M-02', 'carpenter'),
                 ('plumber_saman', 'saman@hostel.ac.lk', 'password123', 'worker', 'Saman Kumara (Plumber)', '+94 78 555 6677', 'Maintenance Dept', 'M-03', 'plumber'),
-                ('student_kasun', 'kasun@student.ac.lk', 'password123', 'student', 'Kasun Jayawardena', '+94 70 666 7788', 'Block A', 'Room 204', 'none'),
-                ('student_amaya', 'amaya@student.ac.lk', 'password123', 'student', 'Amaya Wickramasinghe', '+94 72 777 8899', 'Block B', 'Room 112', 'none'),
+                ('student_kasun', 'kasun@student.ac.lk', 'password123', 'student', 'Kasun Jayawardena', '+94 70 666 7788', 'Block G', 'U112', 'none'),
+                ('student_amaya', 'amaya@student.ac.lk', 'password123', 'student', 'Amaya Wickramasinghe', '+94 72 777 8899', 'Block A', 'Room D113', 'none'),
                 ('guest_user', 'guest@visitor.ac.lk', 'password123', 'guest', 'Guest Visitor / Applicant', '+94 77 888 9900', 'N/A', 'N/A', 'none')
             ]
             cursor.executemany('''
