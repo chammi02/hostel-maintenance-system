@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Hostel Maintenance System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="student-dashboard.html" class="brand" style="display: flex; align-items: center;">
+            <img src="images/uom_logo.png" alt="Logo" style="width: 32px; height: auto; margin-right: 8px;">
+            <span>HostelFix | Student Portal</span>
+        </a>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div class="user-badge">
+                <span id="user-display-name">Loading...</span>
+                <span class="role-tag student">Student</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="openProfileModal()" style="border-radius: 20px; font-weight: 700; background: #eff6ff; color: #1e40af; border-color: #bfdbfe;">
+                👤 Edit Profile
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="Api.logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div>
+                <h1>Student Maintenance Dashboard</h1>
+                <p>Report hostel issues, upload photos, and track repair schedules</p>
+            </div>
+            <button class="btn btn-primary" onclick="scrollToForm()">
+                + Submit New Request
+            </button>
+        </div>
+
+        <!-- Student Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3 id="stat-total">0</h3>
+                    <span>Total Submitted</span>
+                </div>
+                <div class="stat-icon blue">📝</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3 id="stat-pending">0</h3>
+                    <span>Pending / Under Review</span>
+                </div>
+                <div class="stat-icon yellow">⏳</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3 id="stat-scheduled">0</h3>
+                    <span>Assigned &amp; Scheduled</span>
+                </div>
+                <div class="stat-icon purple">📅</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3 id="stat-completed">0</h3>
+                    <span>Completed</span>
+                </div>
+                <div class="stat-icon green">✅</div>
+            </div>
+        </div>
+
+        <!-- Form: Submit Maintenance Request -->
+        <div class="card" id="request-form-card">
+            <div class="card-header">
+                <h2>🛠️ Submit New Maintenance Request</h2>
+            </div>
+            <div class="card-body">
+                <div id="form-alert" style="display:none; padding: 0.75rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem;"></div>
+
+                <form id="submit-request-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="category">Problem Category *</label>
+                            <select id="category" required>
+                                <option value="electrical">⚡ Electrical (Fan, Light, Switch, Socket)</option>
+                                <option value="carpentry">🪚 Carpentry (Door, Window, Bed, Lock)</option>
+                                <option value="plumbing">🚿 Plumbing (Tap, Pipe Leak, Basin, Flush)</option>
+                                <option value="furniture">🪑 Furniture &amp; Study Table</option>
+                                <option value="masonry">🧱 Masonry / Wall / Tile</option>
+                                <option value="other">🔧 Other Repair</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="priority">Priority Level *</label>
+                            <select id="priority">
+                                <option value="low">🟢 Low (Minor annoyance)</option>
+                                <option value="medium" selected>🟡 Medium (Standard issue)</option>
+                                <option value="high">🟠 High (Impacting daily living)</option>
+                                <option value="emergency">🔴 Emergency (Hazardous spark / Flood)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="title">Problem Title / Summary *</label>
+                            <input type="text" id="title" placeholder="e.g. Ceiling fan rotating slowly and making noise" required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="description">Detailed Description of Problem *</label>
+                            <textarea id="description" placeholder="Please describe what happened, when it started, and exact room details..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location">Location / Room Number *</label>
+                            <input type="text" id="location" placeholder="e.g. Block A, 2nd Floor, Room 204" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="photo">Upload Photo of Damage (Optional)</label>
+                            <input type="file" id="photo" accept="image/*" onchange="previewImage(this)">
+                            <img id="image-preview" class="image-preview" alt="Preview">
+                        </div>
+                    </div>
+
+                    <div style="text-align: right; margin-top: 1rem;">
+                        <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem;">
+                            🚀 Submit Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Request Tracking Table -->
+        <div class="card">
+            <div class="card-header">
+                <h2>📋 My Maintenance Requests &amp; Live Status</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Category</th>
+                                <th>Problem Title</th>
+                                <th>Location</th>
+                                <th>Status (Lifecycle)</th>
+                                <th>Scheduled Date &amp; Time</th>
+                                <th>Assigned Worker</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-requests-body">
+                            <tr><td colspan="8" style="text-align:center; padding: 2rem;">Loading requests...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Schedule & Details Modal -->
+    <div id="details-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Request Details</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Student Profile Modal -->
+    <div id="profile-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #2563eb, #7c3aed); color: white;">
+                <h3 style="margin: 0; color: white;">👤 Edit Student Profile</h3>
+                <button class="modal-close" style="color: white;" onclick="closeProfileModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="profile-alert" style="display: none; padding: 0.6rem 0.9rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.88rem; font-weight: 700;"></div>
+                <form id="edit-profile-form" onsubmit="saveProfileChanges(event)">
+                    <div class="form-group">
+                        <label for="prof-fullname">Full Name *</label>
+                        <input type="text" id="prof-fullname" class="form-control" required>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <div class="form-group">
+                            <label for="prof-email">Email Address *</label>
+                            <input type="email" id="prof-email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="prof-phone">Phone Number *</label>
+                            <input type="text" id="prof-phone" class="form-control" required>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <div class="form-group">
+                            <label for="prof-block">Hostel Block *</label>
+                            <select id="prof-block" class="form-control">
+                                <option value="Block A">Block A (Boys)</option>
+                                <option value="Block B">Block B (Girls)</option>
+                                <option value="Block C">Block C (Postgraduate)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="prof-room">Room Number *</label>
+                            <input type="text" id="prof-room" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="prof-password">Change Password (leave empty to keep current)</label>
+                        <input type="password" id="prof-password" class="form-control" placeholder="••••••••">
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.2rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeProfileModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #2563eb, #7c3aed); border: none;">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Star Rating Modal for Completed Requests -->
+    <div id="rating-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 480px; text-align: center;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+                <h3 style="margin: 0; color: white;">⭐ Rate Maintenance Service</h3>
+                <button class="modal-close" style="color: white;" onclick="closeRatingModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 1.5rem;">
+                <p id="rating-req-info" style="font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;"></p>
+                <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 1.2rem;">How satisfied are you with the repair work completed by the hostel maintenance staff?</p>
+                
+                <!-- 5 Stars Selector -->
+                <div id="star-container" style="display: flex; justify-content: center; gap: 0.5rem; font-size: 2.2rem; cursor: pointer; margin-bottom: 1rem;">
+                    <span class="star-btn" onclick="selectStar(1)" onmouseover="hoverStar(1)" onmouseout="resetStarHover()">★</span>
+                    <span class="star-btn" onclick="selectStar(2)" onmouseover="hoverStar(2)" onmouseout="resetStarHover()">★</span>
+                    <span class="star-btn" onclick="selectStar(3)" onmouseover="hoverStar(3)" onmouseout="resetStarHover()">★</span>
+                    <span class="star-btn" onclick="selectStar(4)" onmouseover="hoverStar(4)" onmouseout="resetStarHover()">★</span>
+                    <span class="star-btn" onclick="selectStar(5)" onmouseover="hoverStar(5)" onmouseout="resetStarHover()">★</span>
+                </div>
+                <div id="rating-label" style="font-weight: 800; color: #d97706; margin-bottom: 1rem;">5 - Excellent Service</div>
+
+                <div class="form-group" style="text-align: left;">
+                    <label for="rating-feedback" style="font-weight: 600; font-size: 0.88rem;">Feedback / Comments (Optional)</label>
+                    <textarea id="rating-feedback" class="form-control" rows="3" placeholder="e.g. Technician arrived on time and fixed the switch cleanly. Good job!"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeRatingModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="submitRating()" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 700;">Submit Rating</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        const currentUser = Api.checkAuth(['student']);
+        let studentRequests = [];
+
+        if (currentUser) {
+            document.getElementById('user-display-name').innerText = currentUser.full_name;
+            if (currentUser.room_number) {
+                document.getElementById('location').value = `${currentUser.hostel_block || 'Block A'}, ${currentUser.room_number}`;
+            }
+            loadRequests();
+        }
+
+        function scrollToForm() {
+            document.getElementById('request-form-card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function previewImage(input) {
+            const preview = document.getElementById('image-preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function loadRequests() {
+            studentRequests = await Api.getStudentRequests(currentUser.id);
+            renderTable();
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').innerText = studentRequests.length;
+            document.getElementById('stat-pending').innerText = studentRequests.filter(r => ['PENDING_REVIEW', 'UNDER_REVIEW'].includes(r.status)).length;
+            document.getElementById('stat-scheduled').innerText = studentRequests.filter(r => ['ASSIGNED', 'SCHEDULED'].includes(r.status)).length;
+            document.getElementById('stat-completed').innerText = studentRequests.filter(r => r.status === 'COMPLETED').length;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('student-requests-body');
+            if (studentRequests.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 2rem; color: var(--text-muted);">No maintenance requests submitted yet. Use the form above to submit your first request!</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = studentRequests.map(r => {
+                const badgeClass = `badge-${r.status.toLowerCase()}`;
+                const scheduleInfo = r.scheduled_date 
+                    ? `<strong style="color: #0e7490;">📅 ${r.scheduled_date}</strong><br><small style="color: var(--text-muted);">${r.scheduled_time || 'Pending slot'}</small>` 
+                    : '<span style="color: var(--text-muted);">Awaiting scheduling</span>';
+                
+                const workerInfo = r.worker_name 
+                    ? `<span>${r.worker_name}</span><br><small class="role-tag worker">${r.worker_trade || 'Tech'}</small>` 
+                    : '<span style="color: var(--text-muted);">Unassigned</span>';
+
+                let rateAction = '';
+                if (r.status === 'COMPLETED') {
+                    if (r.rating) {
+                        rateAction = `<div style="margin-top:0.35rem;"><span style="background:#fef3c7; color:#b45309; padding:0.15rem 0.55rem; border-radius:12px; font-weight:800; font-size:0.78rem; border:1px solid #fde68a;">⭐ ${r.rating}/5 Rated</span></div>`;
+                    } else {
+                        rateAction = `<div style="margin-top:0.35rem;"><button class="btn btn-sm" onclick="openRatingModal(${r.id})" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0f172a; font-weight: 800; border-radius: 20px; padding: 0.2rem 0.65rem; font-size: 0.75rem;">⭐ Rate Service</button></div>`;
+                    }
+                }
+
+                return `
+                    <tr>
+                        <td><strong>${r.request_code}</strong></td>
+                        <td style="text-transform: capitalize;">${r.category}</td>
+                        <td>
+                            <strong>${r.title}</strong>
+                            <div style="font-size:0.8rem; color: var(--text-muted);">${r.description.substring(0, 45)}...</div>
+                        </td>
+                        <td>${r.location}</td>
+                        <td>
+                            <span class="badge ${badgeClass}">${r.status.replace('_', ' ')}</span>
+                            ${rateAction}
+                        </td>
+                        <td>${scheduleInfo}</td>
+                        <td>${workerInfo}</td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm" onclick="viewDetails(${r.id})">🔍 Details</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function viewDetails(reqId) {
+            const req = studentRequests.find(r => r.id === reqId);
+            if (!req) return;
+
+            const modal = document.getElementById('details-modal');
+            const body = document.getElementById('modal-body');
+            document.getElementById('modal-title').innerText = `${req.request_code} - ${req.title}`;
+
+            let scheduleNotice = '';
+            if (req.status === 'SCHEDULED') {
+                scheduleNotice = `
+                    <div style="background: #ecfeff; border: 1px solid #a5f3fc; padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+                        <h4 style="color: #0e7490; margin-bottom: 0.25rem;">📅 Repair Appointment Scheduled</h4>
+                        <p style="font-size: 0.9rem;">The Sub Warden and Technician have booked your repair for:</p>
+                        <p style="font-size: 1.1rem; font-weight: 700; color: #155e75; margin: 0.25rem 0;">Date: ${req.scheduled_date} | Time: ${req.scheduled_time}</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Assigned Technician: ${req.worker_name || 'Hostel Maintenance Staff'}</p>
+                        ${req.worker_notes ? `<p style="font-size: 0.85rem; margin-top: 0.3rem;"><em>Technician Note: ${req.worker_notes}</em></p>` : ''}
+                    </div>
+                `;
+            } else if (req.status === 'REJECTED') {
+                scheduleNotice = `
+                    <div style="background: var(--danger-light); border: 1px solid #fca5a5; padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem; color: #991b1b;">
+                        <h4 style="margin-bottom: 0.25rem;">❌ Request Rejected by Sub Warden</h4>
+                        <p style="font-size: 0.9rem;"><strong>Reason:</strong> ${req.rejection_reason || 'Does not comply with hostel maintenance policy.'}</p>
+                    </div>
+                `;
+            }
+
+            body.innerHTML = `
+                ${scheduleNotice}
+                <div style="margin-bottom: 1rem;">
+                    <strong>Location:</strong> ${req.location}<br>
+                    <strong>Priority:</strong> <span style="text-transform: capitalize;">${req.priority}</span><br>
+                    <strong>Submitted:</strong> ${req.created_at || 'Recently'}<br>
+                    <strong>Status:</strong> <span class="badge badge-${req.status.toLowerCase()}">${req.status}</span>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <strong>Description:</strong>
+                    <p style="background: #f8fafc; padding: 0.75rem; border-radius: var(--radius-sm); margin-top: 0.3rem; font-size: 0.9rem;">${req.description}</p>
+                </div>
+                ${req.photo_path ? `
+                    <div>
+                        <strong>Attached Problem Photo:</strong><br>
+                        <img src="${req.photo_path}" style="max-width: 100%; max-height: 220px; border-radius: var(--radius-sm); margin-top: 0.5rem; border: 1px solid var(--border);" alt="Damage photo">
+                    </div>
+                ` : '<p style="color: var(--text-muted); font-size: 0.85rem;">No photo attached.</p>'}
+            `;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('details-modal').style.display = 'none';
+        }
+
+        // Form submission handler
+        document.getElementById('submit-request-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const alertBox = document.getElementById('form-alert');
+            const preview = document.getElementById('image-preview');
+
+            const payload = {
+                student_id: currentUser.id,
+                student_name: currentUser.full_name,
+                category: document.getElementById('category').value,
+                priority: document.getElementById('priority').value,
+                title: document.getElementById('title').value.trim(),
+                description: document.getElementById('description').value.trim(),
+                location: document.getElementById('location').value.trim(),
+                photo_preview: preview.src || null
+            };
+
+            const res = await Api.submitRequest(payload);
+            if (res.success) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = 'var(--success-light)';
+                alertBox.style.color = '#065f46';
+                alertBox.innerText = '✅ Maintenance request submitted successfully! Status is now PENDING_REVIEW.';
+                document.getElementById('submit-request-form').reset();
+                preview.style.display = 'none';
+                loadRequests();
+                setTimeout(() => alertBox.style.display = 'none', 4000);
+            }
+        });
+
+        // ---------------------------------------------------------
+        // Profile Modal Logic
+        // ---------------------------------------------------------
+        function openProfileModal() {
+            const user = Api.getCurrentUser();
+            if (!user) return;
+            document.getElementById('prof-fullname').value = user.full_name || '';
+            document.getElementById('prof-email').value = user.email || '';
+            document.getElementById('prof-phone').value = user.phone || '';
+            document.getElementById('prof-block').value = user.hostel_block || 'Block A';
+            document.getElementById('prof-room').value = user.room_number || '';
+            document.getElementById('prof-password').value = '';
+            document.getElementById('profile-alert').style.display = 'none';
+            document.getElementById('profile-modal').style.display = 'flex';
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profile-modal').style.display = 'none';
+        }
+
+        async function saveProfileChanges(e) {
+            e.preventDefault();
+            const user = Api.getCurrentUser();
+            if (!user) return;
+
+            const data = {
+                fullName: document.getElementById('prof-fullname').value.trim(),
+                email: document.getElementById('prof-email').value.trim(),
+                phone: document.getElementById('prof-phone').value.trim(),
+                hostelBlock: document.getElementById('prof-block').value,
+                roomNumber: document.getElementById('prof-room').value.trim(),
+                password: document.getElementById('prof-password').value.trim()
+            };
+
+            const res = await Api.updateProfile(user.id, data);
+            const alertBox = document.getElementById('profile-alert');
+            if (res && res.success) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = '#ecfdf5';
+                alertBox.style.color = '#065f46';
+                alertBox.innerText = '✅ Profile updated successfully!';
+                
+                // Refresh on-screen elements
+                document.getElementById('user-display-name').innerText = res.user.full_name;
+                document.getElementById('location').value = `${res.user.hostel_block || 'Block A'}, ${res.user.room_number}`;
+                
+                setTimeout(() => closeProfileModal(), 900);
+            } else {
+                alertBox.style.display = 'block';
+                alertBox.style.background = '#fef2f2';
+                alertBox.style.color = '#991b1b';
+                alertBox.innerText = res.message || 'Profile update failed.';
+            }
+        }
+
+        // ---------------------------------------------------------
+        // Star Rating Modal Functions (Requirement 5)
+        // ---------------------------------------------------------
+        let activeRatingReqId = null;
+        let selectedStars = 5;
+        const ratingLabels = {
+            1: '1 - Poor Service',
+            2: '2 - Fair',
+            3: '3 - Good',
+            4: '4 - Very Good',
+            5: '5 - Excellent Service'
+        };
+
+        function openRatingModal(reqId) {
+            const req = studentRequests.find(r => r.id === reqId);
+            if (!req) return;
+            activeRatingReqId = reqId;
+            selectedStars = 5;
+            document.getElementById('rating-req-info').innerText = `${req.request_code}: ${req.title} (${req.worker_name || 'Staff'})`;
+            document.getElementById('rating-feedback').value = '';
+            updateStarDisplay(5);
+            document.getElementById('rating-modal').style.display = 'flex';
+        }
+
+        function closeRatingModal() {
+            document.getElementById('rating-modal').style.display = 'none';
+            activeRatingReqId = null;
+        }
+
+        function selectStar(count) {
+            selectedStars = count;
+            updateStarDisplay(count);
+        }
+
+        function hoverStar(count) {
+            updateStarDisplay(count);
+        }
+
+        function resetStarHover() {
+            updateStarDisplay(selectedStars);
+        }
+
+        function updateStarDisplay(count) {
+            const stars = document.querySelectorAll('#star-container .star-btn');
+            stars.forEach((s, idx) => {
+                if (idx < count) {
+                    s.style.color = '#f59e0b';
+                } else {
+                    s.style.color = '#cbd5e1';
+                }
+            });
+            document.getElementById('rating-label').innerText = ratingLabels[count] || `${count} Stars`;
+        }
+
+        async function submitRating() {
+            if (!activeRatingReqId) return;
+            const feedback = document.getElementById('rating-feedback').value.trim();
+            const res = await Api.rateRequest(activeRatingReqId, selectedStars, feedback);
+            if (res && res.success) {
+                closeRatingModal();
+                await loadRequests();
+                alert(`⭐ Thank you! Your rating of ${selectedStars} stars has been recorded and submitted to the staff.`);
+            } else {
+                alert(res.message || 'Failed to submit rating.');
+            }
+        }
+    </script>
+</body>
+</html>

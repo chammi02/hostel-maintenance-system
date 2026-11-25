@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Maintenance Request Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        :root {
+            --brand-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%);
+            --accent-card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-banner-custom {
+            position: relative;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.78), rgba(30, 58, 138, 0.82)), url('images/university_campus.jpg') no-repeat center center;
+            background-size: cover;
+            color: white;
+            padding: 4.5rem 2rem;
+            border-radius: 20px;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+
+        .hero-logo-custom {
+            width: 86px;
+            height: auto;
+            margin-bottom: 1.2rem;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(4px);
+            padding: 0.4rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fef08a;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Facility Showcase Card */
+        .facility-card-custom {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2.5rem;
+            align-items: center;
+            margin-bottom: 3rem;
+            background: #ffffff;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: var(--accent-card-shadow);
+            border: 1px solid #e2e8f0;
+        }
+        @media (max-width: 860px) {
+            .facility-card-custom { grid-template-columns: 1fr; padding: 1.5rem; }
+        }
+
+        .hostel-img-preview {
+            width: 100%;
+            height: 310px;
+            object-fit: cover;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            border: 3px solid #f1f5f9;
+        }
+
+        .service-pill-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.2rem;
+        }
+
+        .service-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.93rem;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .service-pill:hover {
+            transform: translateX(4px);
+        }
+
+        .service-elec {
+            background: #fffbeb;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+        .service-carp {
+            background: #fff7ed;
+            color: #9a3412;
+            border-left: 4px solid #ea580c;
+        }
+        .service-plumb {
+            background: #f0f9ff;
+            color: #0369a1;
+            border-left: 4px solid #0ea5e9;
+        }
+
+        /* 5 Roles Colorful Grid */
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 3rem;
+        }
+
+        .role-card-colorful {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .role-card-colorful:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+        }
+
+        .role-card-student { border-top: 5px solid #2563eb; }
+        .role-card-warden { border-top: 5px solid #7c3aed; }
+        .role-card-worker { border-top: 5px solid #f59e0b; }
+        .role-card-admin { border-top: 5px solid #e11d48; }
+        .role-card-guest { border-top: 5px solid #059669; }
+
+        .role-icon-bubble {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Guidelines Card */
+        .guidelines-card {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: var(--accent-card-shadow);
+            overflow: hidden;
+            margin-bottom: 3rem;
+        }
+
+        .guidelines-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .guidelines-body {
+            padding: 2rem;
+        }
+
+        .guideline-item {
+            display: flex;
+            gap: 1.25rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .guideline-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .guide-badge-pill {
+            font-weight: 800;
+            font-size: 0.78rem;
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            height: fit-content;
+        }
+
+        .portal-live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: #ecfdf5;
+            color: #065f46;
+            padding: 0.25rem 0.65rem;
+            border-radius: 20px;
+            border: 1px solid #a7f3d0;
+        }
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="index.html" class="brand" style="display: flex; align-items: center;">
+            <img src="images/uom_logo.png" alt="University Logo" style="width: 34px; height: auto; margin-right: 8px;">
+            <span style="font-weight: 800; color: #1e3a8a;">HostelFix Portal</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="#facility">Hostel Facilities</a></li>
+            <li><a href="#roles">5 System Roles</a></li>
+            <li><a href="#rules">Guidelines</a></li>
+            <li><a href="login.html" class="btn btn-secondary btn-sm" style="background: #fbbf24; color: #0f172a; font-weight: 700; border-radius: 20px; padding: 0.4rem 1.1rem;">Login Portal</a></li>
+            <li><a href="register.html" class="btn btn-primary btn-sm" style="background: #2563eb; color: white; font-weight: 700; border-radius: 20px; padding: 0.4rem 1.1rem;">Student Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Hero Section featuring Campus Image -->
+        <div class="hero-banner-custom">
+            <span class="hero-badge">University Residential Maintenance System</span><br>
+            <img src="images/uom_logo.png" alt="University Crest" class="hero-logo-custom">
+            <h1 style="font-size: 2.4rem; font-weight: 900; margin-bottom: 0.85rem; color: #ffffff; letter-spacing: -0.5px;">
+                Hostel Maintenance Request Management System
+            </h1>
+            <p style="font-size: 1.15rem; max-width: 820px; margin: 0 auto 2rem; color: #e2e8f0; line-height: 1.6;">
+                Institute of Technology, University of Moratuwa (ITUM).<br>
+                Empowering Students, Sub Wardens, and Skilled Technicians (Electrician, Carpenter, Plumber) with transparent complaint submission, photo upload, and live repair scheduling.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="login.html" class="btn btn-primary" style="background: #2563eb; color: white; font-weight: 700; padding: 0.85rem 2.2rem; border-radius: 50px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.5);">
+                    🔐 Access Login Portal
+                </a>
+                <a href="register.html" class="btn btn-secondary" style="background: #ffffff; color: #1e3a8a; font-weight: 700; padding: 0.85rem 2.2rem; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+                    🎓 New Student Registration
+                </a>
+            </div>
+        </div>
+
+        <!-- 1. Hostel Facility Showcase (Admin Editable) -->
+        <div class="facility-card-custom" id="facility">
+            <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <div class="portal-live-indicator"><span class="live-dot"></span> Official Campus Facility</div>
+                    <span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Admin Editable</span>
+                </div>
+                <h2 id="portal-showcase-title" style="color: #1e3a8a; margin-top: 0.35rem; font-size: 1.75rem; font-weight: 800;">
+                    🏢 University Hostel Facility Showcase
+                </h2>
+                <p id="portal-showcase-desc" style="color: #475569; line-height: 1.7; margin-top: 0.75rem; font-size: 0.98rem;">
+                    Our residential facilities provide comfortable accommodation for undergraduates with study furniture, beds, and standard amenities. 
+                    This portal empowers residents to report faults directly with photographic evidence and room location tracking.
+                </p>
+
+                <!-- Colorful Service Highlights (including Plumber, Electrician, Carpenter) -->
+                <div class="service-pill-box">
+                    <div class="service-pill service-elec">
+                        <span style="font-size: 1.35rem;">⚡</span>
+                        <div>
+                            <strong>Electrical Services:</strong>
+                            <span id="portal-showcase-elec">Ceiling fans, room lights, socket outlets, main breakers.</span>
+                        </div>
+                    </div>
+                    <div class="service-pill service-carp">
+                        <span style="font-size: 1.35rem;">🪚</span>
+                        <div>
+                            <strong>Carpentry Services:</strong>
+                            <span id="portal-showcase-carp">Beds, study tables, doors, locks, cupboard hinges.</span>
+                        </div>
+                    </div>
+                    <div class="service-pill service-plumb">
+                        <span style="font-size: 1.35rem;">🚿</span>
+                        <div>
+                            <strong>Plumbing Services (Plumber):</strong>
+                            <span id="portal-showcase-plumb">Water taps, bathroom drainage, water tank lines, low pressure fixes.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Picture 3: Hostel Building -->
+            <div>
+                <img src="images/hostel_building.jpg" alt="University Hostel Complex" class="hostel-img-preview">
+                <p id="portal-showcase-caption" style="text-align: center; color: #64748b; font-size: 0.88rem; margin-top: 0.65rem; font-weight: 600;">
+                    📍 Official University Hostel Residential Complex
+                </p>
+            </div>
+        </div>
+
+        <!-- 2. System Architecture & 5 User Roles (Admin Editable) -->
+        <div id="roles" style="margin-bottom: 1.25rem;">
+            <div class="dashboard-header" style="margin-bottom: 1rem;">
+                <div>
+                    <h2 id="portal-roles-title" style="font-size: 1.75rem; font-weight: 800; color: #0f172a;">
+                        👥 System Architecture &amp; User Roles (5 Roles)
+                    </h2>
+                    <p id="portal-roles-subtitle" style="color: #64748b;">
+                        Designed strictly per Activity Swimlane &amp; State Transition Diagrams
+                    </p>
+                </div>
+                <div class="portal-live-indicator"><span class="live-dot"></span> 5 Integrated Roles</div>
+            </div>
+
+            <div class="roles-grid">
+                <!-- 1. Student -->
+                <div class="role-card-colorful role-card-student">
+                    <div>
+                        <div class="role-icon-bubble" style="background: #eff6ff; color: #2563eb;">🎓</div>
+                        <h3 style="color: #1e40af; font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem;">Student</h3>
+                        <p id="portal-role-student" style="font-size: 0.88rem; color: #475569; line-height: 1.55;">
+                            Submits maintenance complaints with photos &amp; room location, tracks scheduled date/time, and edits their student profile.
+                        </p>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <a href="register.html" style="color: #2563eb; font-weight: 700; font-size: 0.82rem; text-decoration: none;">Register Now &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- 2. Sub Warden -->
+                <div class="role-card-colorful role-card-warden">
+                    <div>
+                        <div class="role-icon-bubble" style="background: #f5f3ff; color: #7c3aed;">🛡️</div>
+                        <h3 style="color: #6b21a8; font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem;">Sub Warden</h3>
+                        <p id="portal-role-warden" style="font-size: 0.88rem; color: #475569; line-height: 1.55;">
+                            Reviews requests, verifies validity, rejects violations with reasons, and assigns jobs to Electricians, Carpenters, or Plumbers.
+                        </p>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <span style="color: #7c3aed; font-weight: 700; font-size: 0.82rem;">Admin Assigned</span>
+                    </div>
+                </div>
+
+                <!-- 3. Maintenance Staff -->
+                <div class="role-card-colorful role-card-worker">
+                    <div>
+                        <div class="role-icon-bubble" style="background: #fffbeb; color: #d97706;">🔧</div>
+                        <h3 style="color: #b45309; font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem;">Maintenance Staff</h3>
+                        <p id="portal-role-worker" style="font-size: 0.88rem; color: #475569; line-height: 1.55;">
+                            Electrician, Carpenter, &amp; Plumber receive jobs, input available inspection date/time, and mark completion.
+                        </p>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <span style="color: #d97706; font-weight: 700; font-size: 0.82rem;">3 Specialized Trades</span>
+                    </div>
+                </div>
+
+                <!-- 4. Administrator -->
+                <div class="role-card-colorful role-card-admin">
+                    <div>
+                        <div class="role-icon-bubble" style="background: #fff1f2; color: #e11d48;">⚙️</div>
+                        <h3 style="color: #be123c; font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem;">Administrator</h3>
+                        <p id="portal-role-admin" style="font-size: 0.88rem; color: #475569; line-height: 1.55;">
+                            Manages all user accounts, assigns staff trades, oversees maintenance metrics, and edits public portal content.
+                        </p>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <span style="color: #be123c; font-weight: 700; font-size: 0.82rem;">System Control</span>
+                    </div>
+                </div>
+
+                <!-- 5. Guest User -->
+                <div class="role-card-colorful role-card-guest">
+                    <div>
+                        <div class="role-icon-bubble" style="background: #ecfdf5; color: #059669;">👤</div>
+                        <h3 style="color: #047857; font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem;">Guest User</h3>
+                        <p id="portal-role-guest" style="font-size: 0.88rem; color: #475569; line-height: 1.55;">
+                            Views public hostel maintenance regulations, guidelines, emergency notices, and registers for student access.
+                        </p>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <span style="color: #047857; font-weight: 700; font-size: 0.82rem;">Public Read-Only</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Hostel Maintenance Guidelines (Guest Information) (Admin Editable) -->
+        <div class="guidelines-card" id="rules">
+            <div class="guidelines-header">
+                <h3 id="portal-guide-title" style="margin: 0; font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+                    📋 Hostel Maintenance Guidelines (Guest Information)
+                </h3>
+                <span class="portal-live-indicator" style="background: rgba(255,255,255,0.2); color: white; border-color: rgba(255,255,255,0.4);">
+                    Policy Enforcement
+                </span>
+            </div>
+            <div class="guidelines-body">
+                <div class="guideline-item">
+                    <span class="guide-badge-pill" style="background: #fef3c7; color: #b45309;">⚠️ Safety Precautions</span>
+                    <div id="portal-guide-safety" style="color: #334155; line-height: 1.6; font-size: 0.95rem;">
+                        Only certified campus technicians are permitted to open electrical fixtures. Students must not tamper with main switchboards, breaker boxes, or exposed wiring.
+                    </div>
+                </div>
+
+                <div class="guideline-item">
+                    <span class="guide-badge-pill" style="background: #fee2e2; color: #b91c1c;">🚫 Prohibited Items</span>
+                    <div id="portal-guide-prohibited" style="color: #334155; line-height: 1.6; font-size: 0.95rem;">
+                        High wattage immersion heaters, hotplates, and unauthorized private air conditioner units are strictly barred; repair requests related to unauthorized items will be immediately <strong>REJECTED</strong>.
+                    </div>
+                </div>
+
+                <div class="guideline-item">
+                    <span class="guide-badge-pill" style="background: #d1fae5; color: #047857;">📅 Attendance Policy</span>
+                    <div id="portal-guide-attendance" style="color: #334155; line-height: 1.6; font-size: 0.95rem;">
+                        When a technician schedules a repair appointment, the resident student or an authorized roommate must be present in the room to grant entry and confirm work completion.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 2rem 0; color: #64748b; font-size: 0.9rem; border-top: 1px solid #e2e8f0;">
+            <p><strong>Hostel Maintenance Request Management System</strong> &bull; University of Moratuwa (ITUM)</p>
+            <p style="margin-top: 0.3rem;">5 Roles: Student | Sub Warden | Maintenance Staff (Electrician, Carpenter, Plumber) | Administrator | Guest User</p>
+        </footer>
+    </div>
+
+    <!-- Script to Load Dynamically Admin Edited Content -->
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            renderDynamicPortalContent();
+        });
+
+        function renderDynamicPortalContent() {
+            const content = Api.getPortalContent();
+            if (!content) return;
+
+            // 1. Showcase
+            if (content.facility_showcase) {
+                if (content.facility_showcase.title) document.getElementById('portal-showcase-title').innerText = content.facility_showcase.title;
+                if (content.facility_showcase.description) document.getElementById('portal-showcase-desc').innerText = content.facility_showcase.description;
+                if (content.facility_showcase.electrical_text) document.getElementById('portal-showcase-elec').innerText = content.facility_showcase.electrical_text;
+                if (content.facility_showcase.carpentry_text) document.getElementById('portal-showcase-carp').innerText = content.facility_showcase.carpentry_text;
+                if (content.facility_showcase.plumbing_text) document.getElementById('portal-showcase-plumb').innerText = content.facility_showcase.plumbing_text;
+                if (content.facility_showcase.image_caption) document.getElementById('portal-showcase-caption').innerText = content.facility_showcase.image_caption;
+            }
+
+            // 2. Roles
+            if (content.user_roles) {
+                if (content.user_roles.title) document.getElementById('portal-roles-title').innerText = content.user_roles.title;
+                if (content.user_roles.subtitle) document.getElementById('portal-roles-subtitle').innerText = content.user_roles.subtitle;
+                if (content.user_roles.student_desc) document.getElementById('portal-role-student').innerText = content.user_roles.student_desc;
+                if (content.user_roles.warden_desc) document.getElementById('portal-role-warden').innerText = content.user_roles.warden_desc;
+                if (content.user_roles.worker_desc) document.getElementById('portal-role-worker').innerText = content.user_roles.worker_desc;
+                if (content.user_roles.admin_desc) document.getElementById('portal-role-admin').innerText = content.user_roles.admin_desc;
+                if (content.user_roles.guest_desc) document.getElementById('portal-role-guest').innerText = content.user_roles.guest_desc;
+            }
+
+            // 3. Guidelines
+            if (content.guidelines) {
+                if (content.guidelines.title) document.getElementById('portal-guide-title').innerText = content.guidelines.title;
+                if (content.guidelines.safety_text) document.getElementById('portal-guide-safety').innerText = content.guidelines.safety_text;
+                if (content.guidelines.prohibited_text) document.getElementById('portal-guide-prohibited').innerHTML = content.guidelines.prohibited_text;
+                if (content.guidelines.attendance_text) document.getElementById('portal-guide-attendance').innerText = content.guidelines.attendance_text;
+            }
+        }
+    </script>
+</body>
+</html>

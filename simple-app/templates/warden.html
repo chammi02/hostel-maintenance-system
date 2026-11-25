@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sub Warden Dashboard - Hostel Maintenance</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="navbar">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <img src="/static/images/uom_logo.png" alt="Logo" style="width: 36px; height: auto;">
+            <h2 style="margin: 0; font-size: 1.2rem;">🛡️ Sub Warden Portal (Review & Assign)</h2>
+        </div>
+        <div>
+            <span style="margin-right: 1rem;">Welcome, <strong>{{ session['full_name'] }}</strong></span>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 1100px;">
+        <div class="card">
+            <h3>📋 Student Maintenance Complaints Review</h3>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem;">
+                Review reported hostel damages, assign skilled technicians (Electrician, Carpenter, Plumber), reject invalid requests, or monitor scheduled repair times.
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Req #</th>
+                        <th>Student & Location</th>
+                        <th>Problem Details & Photo</th>
+                        <th>Status</th>
+                        <th>Assigned Staff</th>
+                        <th>📅 Scheduled Date/Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in requests %}
+                    <tr>
+                        <td>#{{ r['id'] }}</td>
+                        <td>
+                            <strong>{{ r['student_name'] }}</strong><br>
+                            <small style="color: #0284c7; font-weight: bold;">📍 {{ r['room_no'] }}</small>
+                        </td>
+                        <td>
+                            <strong style="text-transform: capitalize; color: #1e3a8a;">[{{ r['category'] }}]</strong> 
+                            <strong>{{ r['title'] }}</strong>
+                            <div style="font-size: 0.85rem; color: #555; margin-top: 0.2rem;">{{ r['description'] }}</div>
+                            {% if r['photo'] %}
+                                <div style="margin-top: 0.3rem;">
+                                    <a href="/static/uploads/{{ r['photo'] }}" target="_blank" style="color: #2563eb; font-size: 0.82rem; text-decoration: none;">
+                                        🖼️ View Problem Photo
+                                    </a>
+                                </div>
+                            {% endif %}
+                            {% if r['rejection_reason'] %}
+                                <div style="color: #dc2626; font-size: 0.82rem; margin-top: 0.3rem;">
+                                    <strong>Rejection Reason:</strong> {{ r['rejection_reason'] }}
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ r['status'] }}">{{ r['status'] }}</span>
+                        </td>
+                        <td>
+                            {% if r['worker_name'] %}
+                                <strong>{{ r['worker_name'] }}</strong>
+                            {% else %}
+                                <span style="color: #94a3b8; font-style: italic;">Not Assigned</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if r['scheduled_date'] %}
+                                <strong style="color: #0284c7; font-size: 0.9rem;">
+                                    📅 {{ r['scheduled_date'] }}<br>
+                                    🕒 {{ r['scheduled_time'] }}
+                                </strong>
+                            {% else %}
+                                <span style="color: #94a3b8; font-size: 0.85rem;">Pending schedule</span>
+                            {% endif %}
+                        </td>
+                        <td style="min-width: 200px;">
+                            {% if r['status'] == 'PENDING_REVIEW' %}
+                                <!-- Assign Worker Form -->
+                                <form action="/warden/assign" method="POST" style="margin-bottom: 0.5rem;">
+                                    <input type="hidden" name="req_id" value="{{ r['id'] }}">
+                                    <label style="font-size: 0.75rem; margin: 0 0 0.2rem;">Assign Technician:</label>
+                                    <select name="worker_id" required style="padding: 0.3rem; font-size: 0.85rem; margin-bottom: 0.3rem;">
+                                        <option value="">-- Choose Worker --</option>
+                                        {% for w in workers %}
+                                        <option value="{{ w['id'] }}">
+                                            {{ w['full_name'] }} ({{ w['worker_trade'] }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn" style="padding: 0.3rem 0.6rem; font-size: 0.82rem; width: 100%;">
+                                        Assign Staff
+                                    </button>
+                                </form>
+
+                                <!-- Reject Form -->
+                                <form action="/warden/reject" method="POST">
+                                    <input type="hidden" name="req_id" value="{{ r['id'] }}">
+                                    <input type="text" name="reason" placeholder="Reason (e.g. prohibited AC)" required style="padding: 0.3rem; font-size: 0.85rem; margin-bottom: 0.3rem;">
+                                    <button type="submit" class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.82rem; width: 100%;">
+                                        Reject Request
+                                    </button>
+                                </form>
+                            {% elif r['status'] == 'ASSIGNED' %}
+                                <span style="color: #8b5cf6; font-size: 0.85rem; font-weight: bold;">
+                                    ⏳ Waiting for worker to provide date & time
+                                </span>
+                            {% elif r['status'] == 'SCHEDULED' %}
+                                <span style="color: #0284c7; font-size: 0.85rem; font-weight: bold;">
+                                    ✅ Schedule notified to student
+                                </span>
+                            {% elif r['status'] == 'COMPLETED' %}
+                                <span style="color: #16a34a; font-size: 0.85rem; font-weight: bold;">
+                                    🎉 Work Completed
+                                </span>
+                            {% elif r['status'] == 'REJECTED' %}
+                                <span style="color: #dc2626; font-size: 0.85rem; font-weight: bold;">
+                                    ❌ Rejected
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: #94a3b8; padding: 2rem;">
+                            No maintenance requests submitted yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

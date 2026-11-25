@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration - Hostel Maintenance Portal</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.82), rgba(79, 70, 229, 0.78)), url('/static/images/hostel_building.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .register-card {
+            width: 100%;
+            max-width: 500px;
+            padding: 2.2rem;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.35);
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+        }
+
+        .reg-header {
+            text-align: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .reg-logo {
+            width: 65px;
+            height: auto;
+            margin-bottom: 0.5rem;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.25));
+        }
+
+        .reg-title {
+            color: #1e3a8a;
+            font-size: 1.65rem;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .reg-subtitle {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 0.2rem;
+        }
+
+        .student-note {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            padding: 0.65rem 0.9rem;
+            border-radius: 8px;
+            margin-bottom: 1.2rem;
+            font-size: 0.83rem;
+            color: #1e40af;
+            line-height: 1.45;
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.85rem;
+        }
+        @media (max-width: 480px) {
+            .form-grid-2 { grid-template-columns: 1fr; }
+        }
+
+        .form-group {
+            margin-bottom: 0.95rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 0.3rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.65rem 0.9rem;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            background: #f8fafc;
+        }
+
+        .form-control:focus {
+            border-color: #2563eb;
+            outline: none;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+        }
+
+        .btn-reg {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 0.85rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(37,99,235,0.4);
+            margin-top: 0.6rem;
+            transition: all 0.2s;
+        }
+
+        .btn-reg:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37,99,235,0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="register-card">
+        <div class="reg-header">
+            <img src="/static/images/uom_logo.png" alt="University Logo" class="reg-logo">
+            <h2 class="reg-title">🎓 Student Registration</h2>
+            <p class="reg-subtitle">Hostel Maintenance Request Management Portal</p>
+        </div>
+
+        <div class="student-note">
+            <strong>ℹ️ Students Only:</strong> This registration is strictly for hostel resident students. Sub Wardens and Maintenance Technicians (Electrician, Carpenter, Plumber) are created exclusively by the System Administrator.
+        </div>
+
+        {% if error %}
+            <div style="background: #fee2e2; color: #dc2626; padding: 0.6rem 1rem; border-radius: 8px; font-weight: 700; font-size: 0.88rem; margin-bottom: 1rem;">
+                ⚠️ {{ error }}
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label>Full Name *</label>
+                <input type="text" name="full_name" class="form-control" placeholder="e.g. Kasun Jayawardena" required autofocus>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>Username / Student ID *</label>
+                    <input type="text" name="username" class="form-control" placeholder="e.g. student_kasun" required>
+                </div>
+
+                <div class="form-group">
+                    <label>University Email *</label>
+                    <input type="email" name="email" class="form-control" placeholder="e.g. kasun@student.ac.lk" required>
+                </div>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>Room Number *</label>
+                    <input type="text" name="room_no" class="form-control" placeholder="e.g. Room 204, Block A" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number *</label>
+                    <input type="text" name="phone" class="form-control" placeholder="e.g. 077 123 4567" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Password *</label>
+                <input type="password" name="password" class="form-control" placeholder="Create a password (e.g. 123)" required>
+            </div>
+
+            <button type="submit" class="btn-reg">Complete Student Registration</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.2rem; font-size: 0.9rem; color: #64748b;">
+            Already have an account? <a href="/login" style="color: #2563eb; font-weight: 700; text-decoration: none;">Sign In Here</a>
+            <br>
+            <a href="/" style="display: inline-block; margin-top: 0.6rem; color: #64748b; text-decoration: none; font-size: 0.85rem;">&larr; Back to Public Portal</a>
+        </div>
+    </div>
+
+</body>
+</html>

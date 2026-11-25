@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Hostel Maintenance</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .nav-logo-box { display: flex; align-items: center; gap: 0.75rem; }
+        .nav-logo-img { width: 36px; height: auto; }
+        .hostel-banner-mini {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: #f1f5f9;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            margin-bottom: 1.2rem;
+            border-left: 4px solid #2563eb;
+        }
+        .hostel-thumb {
+            width: 70px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-logo-box">
+            <img src="/static/images/uom_logo.png" alt="University Logo" class="nav-logo-img">
+            <h2 style="margin: 0; font-size: 1.2rem;">🎓 Student Dashboard ({{ session['full_name'] }})</h2>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span>Room: <strong>{{ session['room_no'] }}</strong></span>
+            <button onclick="openProfileModal()" class="btn" style="background: #eff6ff; color: #1d4ed8; border: 1.5px solid #bfdbfe; font-size: 0.85rem; padding: 0.35rem 0.8rem; border-radius: 20px; font-weight: 700; cursor: pointer;">
+                👤 Edit Profile
+            </button>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 1050px;">
+        <div class="hostel-banner-mini">
+            <img src="/static/images/hostel_building.jpg" alt="Hostel Building" class="hostel-thumb">
+            <div>
+                <strong style="color: #1e3a8a;">ITUM University Hostel Complex</strong>
+                <div style="font-size: 0.85rem; color: #64748b;">Lodging complaints for assigned Room: <strong>{{ session['room_no'] }}</strong></div>
+            </div>
+        </div>
+
+        <!-- Submit Maintenance Complaint Card -->
+        <div class="card">
+            <h3>🛠️ Submit New Maintenance Problem</h3>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1.2rem;">
+                Fill out the details below. Attach a clear photo of the broken item so the Sub Warden can assign the right technician.
+            </p>
+
+            <form method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label>Problem Category *</label>
+                    <select name="category" required>
+                        <option value="electrical">⚡ Electrical (Fan, Tube Light, Socket, Switch)</option>
+                        <option value="carpentry">🪚 Carpentry (Bed frame, Study table, Door lock, Cupboard)</option>
+                        <option value="plumbing">🚿 Plumbing (Water tap leak, Flush blocked, Basin)</option>
+                        <option value="masonry">🧱 Civil / Masonry (Wall cracks, Tile damage, Paint)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Hostel Room Number / Location *</label>
+                    <input type="text" name="room_no" value="{{ session['room_no'] }}" required placeholder="e.g. Room 204, Block B">
+                </div>
+
+                <div style="grid-column: 1 / -1;">
+                    <label>Problem Summary (Title) *</label>
+                    <input type="text" name="title" placeholder="e.g. Ceiling fan sparking when turned on" required>
+                </div>
+
+                <div style="grid-column: 1 / -1;">
+                    <label>Detailed Problem Explanation *</label>
+                    <textarea name="description" rows="3" placeholder="Explain what happened, since when, and any urgency..." required></textarea>
+                </div>
+
+                <div style="grid-column: 1 / -1;">
+                    <label>Upload Problem Photo (Damage Verification)</label>
+                    <input type="file" name="photo" accept="image/*">
+                </div>
+
+                <div style="grid-column: 1 / -1;">
+                    <button type="submit" class="btn" style="width: 100%; font-size: 1rem; padding: 0.75rem;">
+                        Submit Maintenance Request
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- My Submitted Requests Table -->
+        <div class="card">
+            <h3>📋 My Submitted Maintenance Complaints & Live Status</h3>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem;">
+                Follow the progress of your requests through: <em>Pending Review &rarr; Assigned &rarr; Scheduled &rarr; Completed</em>.
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Req #</th>
+                        <th>Category</th>
+                        <th>Problem Summary</th>
+                        <th>Status</th>
+                        <th>Assigned Staff</th>
+                        <th>📅 Scheduled Appointment</th>
+                        <th>Attached Photo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in requests %}
+                    <tr>
+                        <td>#{{ r['id'] }}</td>
+                        <td>
+                            <strong style="text-transform: capitalize; color: #1e3a8a;">{{ r['category'] }}</strong><br>
+                            <small style="color: #64748b;">📍 {{ r['room_no'] }}</small>
+                        </td>
+                        <td>
+                            <strong>{{ r['title'] }}</strong>
+                            <div style="font-size: 0.85rem; color: #555; margin-top: 0.2rem;">{{ r['description'] }}</div>
+                            {% if r['rejection_reason'] %}
+                                <div style="color: #dc2626; font-size: 0.82rem; margin-top: 0.3rem;">
+                                    <strong>Rejection Reason:</strong> {{ r['rejection_reason'] }}
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ r['status'] }}">{{ r['status'] }}</span>
+                        </td>
+                        <td>
+                            {% if r['worker_name'] %}
+                                <strong>{{ r['worker_name'] }}</strong>
+                            {% else %}
+                                <span style="color: #94a3b8; font-style: italic;">Awaiting Assignment</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if r['scheduled_date'] %}
+                                <strong style="color: #0284c7; font-size: 0.9rem;">
+                                    📅 {{ r['scheduled_date'] }}<br>
+                                    🕒 {{ r['scheduled_time'] }}
+                                </strong>
+                            {% else %}
+                                <span style="color: #94a3b8; font-size: 0.85rem;">Not Scheduled Yet</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if r['photo'] %}
+                                <a href="/static/uploads/{{ r['photo'] }}" target="_blank" style="color: #2563eb; font-weight: bold; font-size: 0.85rem; text-decoration: none;">
+                                    🖼️ View Photo
+                                </a>
+                            {% else %}
+                                <span style="color: #94a3b8; font-size: 0.85rem;">No photo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: #94a3b8; padding: 2rem;">
+                            You have not submitted any maintenance requests yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="profile-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 460px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+                <h3 style="margin: 0; color: #1e3a8a;">👤 Edit Student Profile</h3>
+                <span onclick="closeProfileModal()" style="font-size: 1.5rem; cursor: pointer; color: #64748b; font-weight: bold;">&times;</span>
+            </div>
+
+            <form action="/student/profile" method="POST">
+                <div style="margin-bottom: 0.9rem;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 0.3rem;">Full Name *</label>
+                    <input type="text" name="full_name" value="{{ session['full_name'] }}" required style="width: 100%; padding: 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                </div>
+
+                <div style="margin-bottom: 0.9rem;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 0.3rem;">Room Number / Location *</label>
+                    <input type="text" name="room_no" value="{{ session['room_no'] }}" required style="width: 100%; padding: 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                </div>
+
+                <div style="margin-bottom: 0.9rem;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 0.3rem;">Phone Number</label>
+                    <input type="text" name="phone" placeholder="e.g. 077 123 4567" style="width: 100%; padding: 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                </div>
+
+                <div style="margin-bottom: 1.2rem;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 0.3rem;">New Password (Optional)</label>
+                    <input type="password" name="password" placeholder="Leave blank to keep current password" style="width: 100%; padding: 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                    <button type="button" onclick="closeProfileModal()" class="btn" style="background: #e2e8f0; color: #475569; padding: 0.6rem 1.2rem; border-radius: 8px;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="background: #2563eb; color: white; padding: 0.6rem 1.4rem; border-radius: 8px; font-weight: 700;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openProfileModal() {
+            document.getElementById('profile-modal').style.display = 'flex';
+        }
+        function closeProfileModal() {
+            document.getElementById('profile-modal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

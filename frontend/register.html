@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration - Hostel Maintenance System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.85), rgba(79, 70, 229, 0.8)), url('images/hostel_building.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .reg-container {
+            width: 100%;
+            max-width: 520px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+            padding: 2.2rem 2.2rem;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+        }
+
+        .reg-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .reg-logo {
+            width: 68px;
+            height: auto;
+            margin-bottom: 0.6rem;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.25));
+        }
+
+        .reg-title {
+            color: #1e3a8a;
+            font-size: 1.7rem;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .reg-subtitle {
+            color: #64748b;
+            font-size: 0.92rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Role restriction pill alert */
+        .student-only-badge {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.65rem 0.9rem;
+            border-radius: 8px;
+            margin-bottom: 1.3rem;
+            font-size: 0.83rem;
+            color: #1e40af;
+            line-height: 1.45;
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.85rem;
+        }
+        @media (max-width: 480px) {
+            .form-grid-2 { grid-template-columns: 1fr; }
+        }
+
+        .form-group {
+            margin-bottom: 0.95rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 0.3rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.68rem 0.95rem;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            background: #f8fafc;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-register-submit {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #ffffff;
+            border: none;
+            border-radius: 50px;
+            padding: 0.85rem;
+            font-size: 1.15rem;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            margin-top: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .btn-register-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+            background: linear-gradient(135deg, #1d4ed8, #6d28d9);
+        }
+
+        .alert-box {
+            display: none;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.1rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            box-sizing: border-box;
+        }
+
+        .reg-footer {
+            text-align: center;
+            margin-top: 1.4rem;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        .reg-footer a {
+            color: #2563eb;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        .reg-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="reg-container">
+        <div class="reg-header">
+            <img src="images/uom_logo.png" alt="University Crest" class="reg-logo">
+            <h1 class="reg-title">🎓 Student Registration</h1>
+            <p class="reg-subtitle">Hostel Maintenance Request Management Portal</p>
+        </div>
+
+        <div class="student-only-badge">
+            <strong>ℹ️ Student Access Only:</strong> This registration is strictly for resident undergraduates. Sub Wardens and Maintenance Staff are added exclusively by the System Administrator.
+        </div>
+
+        <div id="alert-box" class="alert-box"></div>
+
+        <form id="student-reg-form">
+            <div class="form-group">
+                <label for="fullname">Full Name *</label>
+                <input type="text" id="fullname" class="form-control" placeholder="e.g. Kasun Jayawardena" required autofocus>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="username">Username / Student ID *</label>
+                    <input type="text" id="username" class="form-control" placeholder="e.g. student_kasun" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">University Email *</label>
+                    <input type="email" id="email" class="form-control" placeholder="e.g. kasun@student.ac.lk" required>
+                </div>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="hostel_block">Hostel Block *</label>
+                    <select id="hostel_block" class="form-control" required>
+                        <option value="Block A">Block A (Boys)</option>
+                        <option value="Block B">Block B (Girls)</option>
+                        <option value="Block C">Block C (Postgraduate)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="room_number">Room Number *</label>
+                    <input type="text" id="room_number" class="form-control" placeholder="e.g. Room 204" required>
+                </div>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="text" id="phone" class="form-control" placeholder="e.g. 077 123 4567" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Create Password *</label>
+                    <input type="password" id="password" class="form-control" placeholder="Password (e.g. 123)" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-register-submit">
+                Complete Student Registration
+            </button>
+        </form>
+
+        <div class="reg-footer">
+            Already registered? <a href="login.html">Sign In Here</a>
+            <br>
+            <a href="index.html" style="display: inline-block; margin-top: 0.5rem; color: #64748b; font-size: 0.85rem;">&larr; Back to Public Portal</a>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        function showAlert(msg, isSuccess = false) {
+            const box = document.getElementById('alert-box');
+            box.style.display = 'block';
+            box.innerText = msg;
+            box.style.background = isSuccess ? '#ecfdf5' : '#fef2f2';
+            box.style.color = isSuccess ? '#065f46' : '#991b1b';
+            box.style.border = isSuccess ? '1.5px solid #a7f3d0' : '1.5px solid #fecaca';
+        }
+
+        document.getElementById('student-reg-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullname').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const hostelBlock = document.getElementById('hostel_block').value;
+            const roomNumber = document.getElementById('room_number').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            const res = await Api.register({
+                fullName: fullName,
+                username: username,
+                email: email,
+                hostelBlock: hostelBlock,
+                roomNumber: roomNumber,
+                phone: phone,
+                password: password
+            });
+
+            if (res && res.success) {
+                showAlert(`🎉 Registration Successful! Welcome ${fullName}. Redirecting to login...`, true);
+                setTimeout(function() {
+                    window.location.href = 'login.html';
+                }, 1200);
+            } else {
+                showAlert((res && res.message) ? res.message : 'Registration failed. Please check your details.');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Maintenance Portal - University of Moratuwa</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .hero-banner {
+            position: relative;
+            background: linear-gradient(rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.75)), url('/static/images/university_campus.jpg') no-repeat center center;
+            background-size: cover;
+            color: white;
+            padding: 4.5rem 1.5rem;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+        }
+        .hero-logo {
+            width: 85px;
+            height: auto;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+        }
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.6);
+        }
+        .hero-subtitle {
+            font-size: 1.15rem;
+            max-width: 780px;
+            margin: 0 auto 1.8rem;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-hero-login {
+            background: #2563eb;
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.5);
+            transition: all 0.2s;
+        }
+        .btn-hero-login:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+        .btn-hero-reg {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1e3a8a;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+        .btn-hero-reg:hover {
+            background: #ffffff;
+            transform: translateY(-2px);
+        }
+        .facility-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        @media (max-width: 768px) {
+            .facility-grid { grid-template-columns: 1fr; }
+            .hero-title { font-size: 1.8rem; }
+        }
+        .facility-img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .nav-logo-box {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .nav-logo-img {
+            width: 38px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-logo-box">
+            <img src="/static/images/uom_logo.png" alt="University Logo" class="nav-logo-img">
+            <h2 style="margin: 0; font-size: 1.2rem;">Hostel Maintenance Portal</h2>
+        </div>
+        <div>
+            {% if user %}
+                <span style="margin-right: 1rem;">Logged in as: <strong>{{ user }}</strong></span>
+                <a href="/logout">Logout</a>
+            {% else %}
+                <a href="/register" class="btn" style="background: #10b981; margin-right: 0.5rem; border-radius: 20px;">📝 Register</a>
+                <a href="/login" class="btn" style="background: #fbbf24; color: #0f172a; border-radius: 20px;">🔑 Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 1100px;">
+        <!-- Hero Section featuring Picture 2 (University Campus) -->
+        <div class="hero-banner">
+            <img src="/static/images/uom_logo.png" alt="University Crest" class="hero-logo">
+            <h1 class="hero-title">Hostel Maintenance Request Management System</h1>
+            <p class="hero-subtitle">
+                Institute of Technology, University of Moratuwa (ITUM).<br>
+                A seamless digital platform for students to report damages, Sub Wardens to assign technicians, and maintenance staff to schedule repair appointments.
+            </p>
+            <div class="hero-actions">
+                <a href="/login" class="btn-hero-login">Sign In (Login Portal)</a>
+                <a href="/register" class="btn-hero-reg">New Student Registration</a>
+            </div>
+        </div>
+
+        <!-- Hostel Facility Showcase featuring Picture 3 (University Hostel) -->
+        <div class="card">
+            <div class="facility-grid">
+                <div>
+                    <h2 style="color: #1e3a8a; margin-top: 0;">🏢 Our Hostel Facilities & Maintenance System</h2>
+                    <p style="color: #475569; line-height: 1.7; font-size: 0.95rem;">
+                        The University Hostel provides modern residential facilities for undergraduates. 
+                        To maintain standard living conditions, our automated maintenance system allows students to report faults immediately with photos and exact room numbers.
+                    </p>
+                    <ul style="margin: 1rem 0 0 1.2rem; line-height: 1.8; color: #334155; font-size: 0.92rem;">
+                        <li><strong>⚡ Electricians:</strong> Ceiling fans, room lights, socket outlets, main breakers.</li>
+                        <li><strong>🪚 Carpenters:</strong> Beds, study tables, chairs, door locks, cupboard hinges.</li>
+                        <li><strong>🚿 Plumbers:</strong> Taps, bathroom drainage, water tank lines.</li>
+                        <li><strong>🛡️ Sub Warden Oversight:</strong> Fast approvals, policy verification, technician assignment.</li>
+                    </ul>
+                </div>
+                <div>
+                    <img src="/static/images/hostel_building.jpg" alt="University Hostel Building" class="facility-img">
+                    <p style="text-align: center; color: #64748b; font-size: 0.85rem; margin-top: 0.4rem;">
+                        📍 Official University Hostel Residential Complex
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5 System Roles Overview -->
+        <div class="card">
+            <h3 style="color: #1e3a8a;">👥 System Roles & Workflow (පද්ධතියේ පරිශීලකයින් 5 දෙනා)</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div style="padding: 1rem; border: 1px solid #e2e8f0; border-radius: 8px; text-align: center; background: #f8fafc;">
+                    <div style="font-size: 2rem;">🎓</div>
+                    <strong style="color: #1e3a8a;">Student</strong>
+                    <p style="font-size: 0.83rem; color: #64748b; margin-top: 0.3rem;">Submit complaints with photos & location, track scheduled time.</p>
+                </div>
+                <div style="padding: 1rem; border: 1px solid #e2e8f0; border-radius: 8px; text-align: center; background: #f8fafc;">
+                    <div style="font-size: 2rem;">🛡️</div>
+                    <strong style="color: #1e3a8a;">Sub Warden</strong>
+                    <p style="font-size: 0.83rem; color: #64748b; margin-top: 0.3rem;">Review requests, assign skilled worker, reject policy violations.</p>
+                </div>
+                <div style="padding: 1rem; border: 1px solid #e2e8f0; border-radius: 8px; text-align: center; background: #f8fafc;">
+                    <div style="font-size: 2rem;">⚡</div>
+                    <strong style="color: #1e3a8a;">Technician</strong>
+                    <p style="font-size: 0.83rem; color: #64748b; margin-top: 0.3rem;">Provide inspection date & time slot, complete repair work.</p>
+                </div>
+                <div style="padding: 1rem; border: 1px solid #e2e8f0; border-radius: 8px; text-align: center; background: #f8fafc;">
+                    <div style="font-size: 2rem;">⚙️</div>
+                    <strong style="color: #1e3a8a;">Admin</strong>
+                    <p style="font-size: 0.83rem; color: #64748b; margin-top: 0.3rem;">Manage user accounts, trades, roles, and maintenance records.</p>
+                </div>
+                <div style="padding: 1rem; border: 1px solid #e2e8f0; border-radius: 8px; text-align: center; background: #f8fafc;">
+                    <div style="font-size: 2rem;">👤</div>
+                    <strong style="color: #1e3a8a;">Guest</strong>
+                    <p style="font-size: 0.83rem; color: #64748b; margin-top: 0.3rem;">View hostel maintenance guidelines, register for an account.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hostel Rules for Guest View -->
+        <div class="card">
+            <h3 style="color: #1e3a8a;">📋 Hostel Maintenance Regulations & Guest Guidelines</h3>
+            <ul style="margin-left: 1.5rem; line-height: 1.8; color: #334155; font-size: 0.92rem;">
+                <li><strong>Electrical Safety:</strong> Only certified campus technicians are permitted to open electrical fixtures. Students must not tamper with wiring.</li>
+                <li><strong>Prohibited Items:</strong> High wattage immersion heaters and private air conditioners are strictly forbidden; requests related to unauthorized items will be <strong>REJECTED</strong>.</li>
+                <li><strong>Presence in Room:</strong> When a repair slot is scheduled by a technician, the resident student or a room partner must remain present.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

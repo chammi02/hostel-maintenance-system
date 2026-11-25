@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Administrator Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; text-align: center; }
+        .stat-number { font-size: 1.8rem; font-weight: bold; color: #1e3a8a; }
+        .stat-label { font-size: 0.85rem; color: #64748b; text-transform: uppercase; margin-top: 0.3rem; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <img src="/static/images/uom_logo.png" alt="Logo" style="width: 36px; height: auto;">
+            <h2 style="margin: 0; font-size: 1.2rem;">⚙️ Administrator Control Panel</h2>
+        </div>
+        <div>
+            <span style="margin-right: 1rem;">Logged in as: <strong>{{ session['username'] }}</strong></span>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 1100px;">
+        <!-- Live Statistics Summary -->
+        <div class="card">
+            <h3>📊 Hostel Maintenance System Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ stats.total_requests }}</div>
+                    <div class="stat-label">Total Requests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #f59e0b;">{{ stats.pending }}</div>
+                    <div class="stat-label">Pending Review</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #8b5cf6;">{{ stats.assigned }}</div>
+                    <div class="stat-label">Assigned</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #0284c7;">{{ stats.scheduled }}</div>
+                    <div class="stat-label">Scheduled</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #16a34a;">{{ stats.completed }}</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #dc2626;">{{ stats.rejected }}</div>
+                    <div class="stat-label">Rejected</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ stats.total_users }}</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add User Form -->
+        <div class="card">
+            <h3>➕ Add New User (Admin Management)</h3>
+            <form action="/admin/add-user" method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+                <div>
+                    <label>Full Name *</label>
+                    <input type="text" name="full_name" placeholder="e.g. Sunil Perera" required style="margin-bottom: 0;">
+                </div>
+                <div>
+                    <label>Username *</label>
+                    <input type="text" name="username" placeholder="e.g. sunil23" required style="margin-bottom: 0;">
+                </div>
+                <div>
+                    <label>Password *</label>
+                    <input type="password" name="password" placeholder="Password" required style="margin-bottom: 0;">
+                </div>
+                <div>
+                    <label>Role *</label>
+                    <select name="role" required style="margin-bottom: 0;">
+                        <option value="student">🎓 Student</option>
+                        <option value="warden">🛡️ Sub Warden</option>
+                        <option value="worker">⚡ Maintenance Worker</option>
+                        <option value="admin">⚙️ Administrator</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Worker Trade (if worker)</label>
+                    <select name="trade" style="margin-bottom: 0;">
+                        <option value="none">None</option>
+                        <option value="electrician">Electrician</option>
+                        <option value="carpenter">Carpenter</option>
+                        <option value="plumber">Plumber</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Phone Number</label>
+                    <input type="text" name="phone" placeholder="0771122334" style="margin-bottom: 0;">
+                </div>
+                <div>
+                    <label>Room / Office</label>
+                    <input type="text" name="room_no" placeholder="Room 102 / Office" style="margin-bottom: 0;">
+                </div>
+                <div>
+                    <button type="submit" class="btn" style="width: 100%;">Create User</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- All Users Table -->
+        <div class="card">
+            <h3>👥 Manage Existing Users (CRUD)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Full Name</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Trade</th>
+                        <th>Phone</th>
+                        <th>Location</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td>#{{ u['id'] }}</td>
+                        <td><strong>{{ u['full_name'] }}</strong></td>
+                        <td><code>{{ u['username'] }}</code></td>
+                        <td>
+                            {% if u['role'] == 'admin' %}
+                                <span class="badge" style="background: #1e293b;">Admin</span>
+                            {% elif u['role'] == 'warden' %}
+                                <span class="badge" style="background: #0369a1;">Warden</span>
+                            {% elif u['role'] == 'worker' %}
+                                <span class="badge" style="background: #d97706;">Worker</span>
+                            {% elif u['role'] == 'student' %}
+                                <span class="badge" style="background: #2563eb;">Student</span>
+                            {% else %}
+                                <span class="badge" style="background: #64748b;">Guest</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ u['worker_trade'] if u['worker_trade'] != 'none' else '-' }}</td>
+                        <td>{{ u['phone'] or '-' }}</td>
+                        <td>{{ u['room_no'] or '-' }}</td>
+                        <td>
+                            {% if u['id'] != session['user_id'] %}
+                                <a href="/admin/delete-user/{{ u['id'] }}" 
+                                   onclick="return confirm('Are you sure you want to delete user {{ u['username'] }}?')"
+                                   class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+                                    Delete
+                                </a>
+                            {% else %}
+                                <span style="color: #94a3b8; font-size: 0.8rem;">(Current)</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

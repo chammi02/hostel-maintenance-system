@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Maintenance Worker Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="navbar">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <img src="/static/images/uom_logo.png" alt="Logo" style="width: 36px; height: auto;">
+            <h2 style="margin: 0; font-size: 1.2rem;">⚡ Maintenance Staff Dashboard ({{ session['full_name'] }})</h2>
+        </div>
+        <div>
+            <span style="margin-right: 1rem;">Trade: <strong>{{ session['worker_trade'] | capitalize }}</strong></span>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 1050px;">
+        <div class="card">
+            <h3>🛠️ Assigned Maintenance Work Orders</h3>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem;">
+                Review your assigned hostel repair jobs, schedule an inspection date & time slot for the student, and mark jobs as completed after fixing.
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Job #</th>
+                        <th>Location & Student</th>
+                        <th>Issue Summary & Description</th>
+                        <th>Status</th>
+                        <th>Schedule Repair (Date & Time)</th>
+                        <th>Completion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tasks %}
+                    <tr>
+                        <td>#{{ t['id'] }}</td>
+                        <td>
+                            <strong style="color: #0284c7;">📍 {{ t['room_no'] }}</strong><br>
+                            <small>{{ t['student_name'] }}</small>
+                        </td>
+                        <td>
+                            <strong style="color: #1e3a8a;">[{{ t['category'] | capitalize }}]</strong> <strong>{{ t['title'] }}</strong>
+                            <div style="font-size: 0.85rem; color: #555; margin-top: 0.2rem;">{{ t['description'] }}</div>
+                            {% if t['photo'] %}
+                                <div style="margin-top: 0.3rem;">
+                                    <a href="/static/uploads/{{ t['photo'] }}" target="_blank" style="color: #2563eb; font-size: 0.82rem; text-decoration: none;">
+                                        🖼️ View Problem Photo
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ t['status'] }}">{{ t['status'] }}</span>
+                        </td>
+                        <td style="min-width: 210px;">
+                            {% if t['status'] == 'ASSIGNED' %}
+                                <!-- Provide Repair Date & Time to Sub Warden and Student -->
+                                <form action="/worker/schedule" method="POST">
+                                    <input type="hidden" name="req_id" value="{{ t['id'] }}">
+                                    <label style="font-size: 0.75rem; margin: 0 0 0.2rem;">Available Repair Date:</label>
+                                    <input type="date" name="date" required style="padding: 0.3rem; font-size: 0.85rem; margin-bottom: 0.3rem;">
+                                    
+                                    <label style="font-size: 0.75rem; margin: 0 0 0.2rem;">Time Slot (e.g. 10:00 AM):</label>
+                                    <input type="text" name="time" placeholder="e.g. 10:00 AM - 11:30 AM" required style="padding: 0.3rem; font-size: 0.85rem; margin-bottom: 0.3rem;">
+                                    
+                                    <button type="submit" class="btn" style="padding: 0.35rem 0.7rem; font-size: 0.82rem; width: 100%;">
+                                        Confirm & Notify Schedule
+                                    </button>
+                                </form>
+                            {% else %}
+                                <strong style="color: #0284c7; font-size: 0.9rem;">
+                                    📅 {{ t['scheduled_date'] }}<br>
+                                    🕒 {{ t['scheduled_time'] }}
+                                </strong>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if t['status'] == 'SCHEDULED' %}
+                                <a href="/worker/complete/{{ t['id'] }}" 
+                                   onclick="return confirm('Mark this repair work as completed?')"
+                                   class="btn btn-success" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                                    Mark Completed
+                                </a>
+                            {% elif t['status'] == 'COMPLETED' %}
+                                <span style="color: #16a34a; font-weight: bold; font-size: 0.9rem;">
+                                    ✅ Done
+                                </span>
+                            {% else %}
+                                <span style="color: #94a3b8; font-size: 0.85rem;">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">
+                            No maintenance tasks currently assigned to you.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

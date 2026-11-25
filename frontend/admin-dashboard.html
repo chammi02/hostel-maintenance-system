@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Hostel Maintenance System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        :root {
+            --admin-red: #e11d48;
+            --admin-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
+        }
+        
+        .admin-hero-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #312e81 100%);
+            color: white;
+            padding: 1.8rem 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .admin-hero-title h1 {
+            color: #ffffff;
+            font-size: 1.85rem;
+            font-weight: 800;
+            margin: 0 0 0.4rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .admin-hero-title p {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            margin: 0;
+            max-width: 600px;
+        }
+
+        .nav-tab-bar {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .nav-tab-btn {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 30px;
+            padding: 0.6rem 1.4rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-tab-btn:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .nav-tab-btn.active {
+            background: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+
+        .section-pane {
+            display: none;
+        }
+        .section-pane.active {
+            display: block;
+        }
+
+        /* Colorful Section Cards for Content Editor */
+        .editor-card {
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            margin-bottom: 1.8rem;
+            overflow: hidden;
+        }
+
+        .editor-card-header {
+            padding: 1.2rem 1.6rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .header-showcase {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-left: 5px solid #2563eb;
+        }
+        .header-roles {
+            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+            border-left: 5px solid #7c3aed;
+        }
+        .header-guidelines {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border-left: 5px solid #f59e0b;
+        }
+
+        .editor-card-header h3 {
+            margin: 0;
+            font-size: 1.15rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .editor-card-body {
+            padding: 1.6rem;
+        }
+
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .form-group-full {
+            margin-bottom: 1.2rem;
+        }
+
+        .editor-input {
+            width: 100%;
+            padding: 0.65rem 0.9rem;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            background: #f8fafc;
+            transition: all 0.2s;
+        }
+
+        .editor-input:focus {
+            border-color: #2563eb;
+            outline: none;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        textarea.editor-input {
+            resize: vertical;
+            min-height: 80px;
+            line-height: 1.45;
+        }
+
+        .trade-badge-plumber {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.78rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .trade-badge-electrician {
+            background: #fef3c7;
+            color: #b45309;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.78rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .trade-badge-carpenter {
+            background: #ffedd5;
+            color: #c2410c;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.78rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .save-toolbar {
+            position: sticky;
+            bottom: 1.5rem;
+            background: #ffffff;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 2px solid #3b82f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 90;
+            margin-top: 1.5rem;
+        }
+
+        .toast-notify {
+            display: none;
+            padding: 0.85rem 1.25rem;
+            border-radius: 10px;
+            margin-bottom: 1.2rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="admin-dashboard.html" class="brand" style="display: flex; align-items: center;">
+            <img src="images/uom_logo.png" alt="Logo" style="width: 32px; height: auto; margin-right: 8px;">
+            <span>HostelFix | Admin Console</span>
+        </a>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="user-badge" style="background: #fef2f2; border-color: #fecaca;">
+                <span id="user-display-name" style="font-weight: 700; color: #991b1b;">Administrator</span>
+                <span class="role-tag admin" style="background: #e11d48; color: white;">Admin</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="openAdminProfileModal()" style="font-weight: 700;">👤 Edit Profile</button>
+            <a href="index.html" target="_blank" class="btn btn-secondary btn-sm" style="font-weight: 700;">🌐 View Public Portal</a>
+            <button class="btn btn-secondary btn-sm" onclick="Api.logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Hero Header -->
+        <div class="admin-hero-card">
+            <div class="admin-hero-title">
+                <h1>⚙️ Central System Administration</h1>
+                <p>Manage all 5 system roles (Students, Sub Wardens, Technicians, Admin, Guests) and customize the Public Landing Portal in real time.</p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="openAddUserModal()" style="background: #2563eb; font-weight: 700; padding: 0.7rem 1.5rem; border-radius: 30px;">
+                    + Add New Staff / User
+                </button>
+            </div>
+        </div>
+
+        <!-- Global Toast Notification -->
+        <div id="admin-toast" class="toast-notify"></div>
+
+        <!-- Tab Navigation Bar -->
+        <div class="nav-tab-bar">
+            <button class="nav-tab-btn active" id="tab-btn-users" onclick="switchTab('users')">
+                👥 System Users &amp; Staff (5 Roles)
+            </button>
+            <button class="nav-tab-btn" id="tab-btn-content" onclick="switchTab('content')">
+                🌐 Manage Public Portal Content
+            </button>
+            <button class="nav-tab-btn" id="tab-btn-history" onclick="switchTab('history')">
+                📜 Maintenance Request History (Archive)
+            </button>
+        </div>
+
+        <!-- PANE 1: USERS MANAGEMENT -->
+        <div id="pane-users" class="section-pane active">
+            <!-- System Analytics Summary -->
+            <div class="stats-grid">
+                <div class="stat-card" style="border-top: 4px solid #3b82f6;">
+                    <div class="stat-info">
+                        <h3 id="stat-users">0</h3>
+                        <span>Total Registered Users</span>
+                    </div>
+                    <div class="stat-icon blue">👥</div>
+                </div>
+                <div class="stat-card" style="border-top: 4px solid #2563eb;">
+                    <div class="stat-info">
+                        <h3 id="stat-students">0</h3>
+                        <span>Hostel Students</span>
+                    </div>
+                    <div class="stat-icon blue">🎓</div>
+                </div>
+                <div class="stat-card" style="border-top: 4px solid #f59e0b;">
+                    <div class="stat-info">
+                        <h3 id="stat-workers">0</h3>
+                        <span>Maintenance Staff</span>
+                    </div>
+                    <div class="stat-icon yellow">⚡</div>
+                </div>
+                <div class="stat-card" style="border-top: 4px solid #10b981;">
+                    <div class="stat-info">
+                        <h3 id="stat-requests">0</h3>
+                        <span>Total Requests</span>
+                    </div>
+                    <div class="stat-icon green">📊</div>
+                </div>
+            </div>
+
+            <!-- Users Table Card -->
+            <div class="card" style="margin-top: 1.5rem;">
+                <div class="card-header" style="background: #f8fafc;">
+                    <h2>All Registered Accounts (5 Roles)</h2>
+                    <div style="display: flex; gap: 0.6rem; align-items: center;">
+                        <label for="role-filter" style="margin-bottom: 0; font-size: 0.88rem; font-weight: 700;">Filter Role:</label>
+                        <select id="role-filter" onchange="filterUsers(this.value)" style="padding: 0.4rem 0.8rem; font-size: 0.88rem; border-radius: 8px; border: 1.5px solid #cbd5e1;">
+                            <option value="ALL">All Roles (5 Roles)</option>
+                            <option value="student">🎓 Students</option>
+                            <option value="warden">🛡️ Sub Wardens</option>
+                            <option value="worker">🔧 Maintenance Staff</option>
+                            <option value="admin">⚙️ Administrators</option>
+                            <option value="guest">👤 Guests</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Full Name &amp; Username</th>
+                                    <th>Role</th>
+                                    <th>Trade / Specialty</th>
+                                    <th>Contact Information</th>
+                                    <th>Block / Room</th>
+                                    <th>Account Status</th>
+                                    <th style="text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-body">
+                                <tr><td colspan="8" style="text-align:center; padding: 2rem;">Loading users...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANE 2: PUBLIC PORTAL CONTENT EDITOR -->
+        <div id="pane-content" class="section-pane">
+            <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <strong style="color: #1e40af; font-size: 1.05rem;">✏️ Live Public Portal Editor</strong>
+                <p style="color: #1e3a8a; margin: 0.25rem 0 0 0; font-size: 0.92rem;">
+                    Edit the 3 core informational sections shown on the public landing page (<a href="index.html" target="_blank" style="color: #2563eb; font-weight: 700;">index.html</a>). Changes are stored instantly and visible to students and guests.
+                </p>
+            </div>
+
+            <!-- SECTION 1: Facility Showcase -->
+            <div class="editor-card">
+                <div class="editor-card-header header-showcase">
+                    <h3 style="color: #1e40af;">🏢 1. University Hostel Facility Showcase</h3>
+                    <span style="font-size: 0.82rem; background: #ffffff; padding: 0.2rem 0.6rem; border-radius: 12px; font-weight: 700; color: #1e40af;">Showcase Card</span>
+                </div>
+                <div class="editor-card-body">
+                    <div class="form-group-full">
+                        <label style="font-weight: 700; color: #334155; display:block; margin-bottom: 0.35rem;">Showcase Main Title</label>
+                        <input type="text" id="ed-showcase-title" class="editor-input" placeholder="Facility Title">
+                    </div>
+
+                    <div class="form-group-full">
+                        <label style="font-weight: 700; color: #334155; display:block; margin-bottom: 0.35rem;">Showcase Description Paragraph</label>
+                        <textarea id="ed-showcase-desc" class="editor-input" rows="3" placeholder="Description of hostel living conditions and repair support..."></textarea>
+                    </div>
+
+                    <div class="form-grid-3">
+                        <div>
+                            <label style="font-weight: 700; color: #b45309; display:block; margin-bottom: 0.35rem;">⚡ Electrical Services Highlight</label>
+                            <input type="text" id="ed-showcase-elec" class="editor-input" placeholder="Fans, lights, switches, circuit breakers">
+                        </div>
+                        <div>
+                            <label style="font-weight: 700; color: #c2410c; display:block; margin-bottom: 0.35rem;">🪚 Carpentry Services Highlight</label>
+                            <input type="text" id="ed-showcase-carp" class="editor-input" placeholder="Beds, study tables, doors, locks">
+                        </div>
+                        <div>
+                            <label style="font-weight: 700; color: #0369a1; display:block; margin-bottom: 0.35rem;">🚿 Plumbing Services Highlight (Plumber)</label>
+                            <input type="text" id="ed-showcase-plumb" class="editor-input" placeholder="Taps, wash basins, bathroom drainage">
+                        </div>
+                    </div>
+
+                    <div class="form-group-full" style="margin-top: 1rem;">
+                        <label style="font-weight: 700; color: #334155; display:block; margin-bottom: 0.35rem;">📍 Hostel Building Photo Caption</label>
+                        <input type="text" id="ed-showcase-caption" class="editor-input" placeholder="Image caption for university hostel">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: System Architecture & 5 User Roles -->
+            <div class="editor-card">
+                <div class="editor-card-header header-roles">
+                    <h3 style="color: #6b21a8;">👥 2. System Architecture &amp; User Roles (5 Roles)</h3>
+                    <span style="font-size: 0.82rem; background: #ffffff; padding: 0.2rem 0.6rem; border-radius: 12px; font-weight: 700; color: #6b21a8;">Activity Diagram Roles</span>
+                </div>
+                <div class="editor-card-body">
+                    <div class="form-grid-3" style="margin-bottom: 1.2rem;">
+                        <div>
+                            <label style="font-weight: 700; color: #334155; display:block; margin-bottom: 0.35rem;">Roles Section Heading</label>
+                            <input type="text" id="ed-roles-title" class="editor-input">
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <label style="font-weight: 700; color: #334155; display:block; margin-bottom: 0.35rem;">Section Subtitle</label>
+                            <input type="text" id="ed-roles-subtitle" class="editor-input">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-3">
+                        <div>
+                            <label style="font-weight: 700; color: #1d4ed8; display:block; margin-bottom: 0.35rem;">🎓 1. Student Role Description</label>
+                            <textarea id="ed-role-student" class="editor-input" rows="3"></textarea>
+                        </div>
+                        <div>
+                            <label style="font-weight: 700; color: #7c3aed; display:block; margin-bottom: 0.35rem;">🛡️ 2. Sub Warden Role Description</label>
+                            <textarea id="ed-role-warden" class="editor-input" rows="3"></textarea>
+                        </div>
+                        <div>
+                            <label style="font-weight: 700; color: #d97706; display:block; margin-bottom: 0.35rem;">🔧 3. Maintenance Staff (Electrician/Carpenter/Plumber)</label>
+                            <textarea id="ed-role-worker" class="editor-input" rows="3"></textarea>
+                        </div>
+                        <div>
+                            <label style="font-weight: 700; color: #dc2626; display:block; margin-bottom: 0.35rem;">⚙️ 4. Administrator Role Description</label>
+                            <textarea id="ed-role-admin" class="editor-input" rows="3"></textarea>
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <label style="font-weight: 700; color: #475569; display:block; margin-bottom: 0.35rem;">👤 5. Guest User Role Description</label>
+                            <textarea id="ed-role-guest" class="editor-input" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: Hostel Maintenance Guidelines (Guest Information) -->
+            <div class="editor-card">
+                <div class="editor-card-header header-guidelines">
+                    <h3 style="color: #92400e;">📋 3. Hostel Maintenance Guidelines (Guest Information)</h3>
+                    <span style="font-size: 0.82rem; background: #ffffff; padding: 0.2rem 0.6rem; border-radius: 12px; font-weight: 700; color: #92400e;">Policy Rules</span>
+                </div>
+                <div class="editor-card-body">
+                    <div class="form-group-full">
+                        <label style="font-weight: 700; color: #334155; display:block; margin-bottom: 0.35rem;">Guidelines Card Title</label>
+                        <input type="text" id="ed-guide-title" class="editor-input">
+                    </div>
+
+                    <div class="form-group-full">
+                        <label style="font-weight: 700; color: #b45309; display:block; margin-bottom: 0.35rem;">⚡ Safety Precautions Policy</label>
+                        <textarea id="ed-guide-safety" class="editor-input" rows="2"></textarea>
+                    </div>
+
+                    <div class="form-group-full">
+                        <label style="font-weight: 700; color: #dc2626; display:block; margin-bottom: 0.35rem;">🚫 Prohibited Items Policy (Violations will be REJECTED)</label>
+                        <textarea id="ed-guide-prohibited" class="editor-input" rows="2"></textarea>
+                    </div>
+
+                    <div class="form-group-full">
+                        <label style="font-weight: 700; color: #047857; display:block; margin-bottom: 0.35rem;">📅 Resident Attendance Policy During Repair</label>
+                        <textarea id="ed-guide-attendance" class="editor-input" rows="2"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Sticky Toolbar -->
+            <div class="save-toolbar">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.2rem;">💾</span>
+                    <div>
+                        <strong style="color: #1e293b;">Ready to Publish Changes?</strong>
+                        <div style="font-size: 0.82rem; color: #64748b;">Updates immediately display on public index.html</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button class="btn btn-secondary" onclick="restoreDefaults()" style="border-radius: 30px; font-weight: 700;">
+                        🔄 Restore Defaults
+                    </button>
+                    <button class="btn btn-primary" onclick="savePortalContent()" style="background: #2563eb; border-radius: 30px; font-weight: 700; padding: 0.6rem 1.6rem; box-shadow: 0 4px 12px rgba(37,99,235,0.4);">
+                        💾 Save &amp; Publish Content
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANE 3: MAINTENANCE REQUEST HISTORY & ARCHIVE (Admin & Warden Only) -->
+        <div id="pane-history" class="section-pane">
+            <div class="card" style="border-top: 4px solid #059669; box-shadow: 0 4px 14px rgba(0,0,0,0.06);">
+                <div class="card-header" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.75rem;">
+                    <div>
+                        <h2 style="color: #166534; margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                            📜 Maintenance Request History &amp; Staff Ratings Archive
+                        </h2>
+                        <p style="color: #15803d; font-size: 0.88rem; margin: 0.25rem 0 0 0;">
+                            Completed maintenance requests older than 7 days are automatically archived here. Only System Administrators and Sub Wardens have access.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 0.6rem; align-items: center;">
+                        <span id="history-count-badge" style="background: #166534; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 800; font-size: 0.82rem;">0 Archived Jobs</span>
+                        <button class="btn btn-secondary btn-sm" onclick="loadHistoryRequests()" style="font-weight: 700;">🔄 Refresh</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Student &amp; Location</th>
+                                    <th>Category &amp; Issue</th>
+                                    <th>Assigned Worker</th>
+                                    <th>Timeline / Schedule</th>
+                                    <th>Student Star Rating</th>
+                                    <th>Status &amp; Retention</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-history-body">
+                                <tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading maintenance history archive...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add New User (Admin Only for Wardens & Workers) with Smooth Scrolling Fix -->
+    <div id="add-user-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 580px; max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; flex-shrink: 0;">
+                <h3 style="color: white; margin: 0;">➕ Create New Staff or System Account</h3>
+                <button class="modal-close" onclick="closeAddUserModal()" style="color: white;">&times;</button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto; flex: 1 1 auto; padding: 1.5rem; max-height: calc(90vh - 140px);">
+                <div style="background: #eff6ff; border-left: 3px solid #2563eb; padding: 0.65rem 0.9rem; border-radius: 6px; font-size: 0.83rem; color: #1e40af; margin-bottom: 1rem;">
+                    <strong>🛡️ Administrative Privilege:</strong> Sub Wardens and Maintenance Technicians (Electricians, Carpenters, Plumbers) can only be created by the System Administrator.
+                </div>
+
+                <form id="add-user-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="new-fullname">Full Name *</label>
+                            <input type="text" id="new-fullname" placeholder="e.g. Saman Kumara" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-username">Username *</label>
+                            <input type="text" id="new-username" placeholder="e.g. plumber_saman" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-email">Email Address *</label>
+                            <input type="email" id="new-email" placeholder="e.g. saman@hostel.ac.lk" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-role">Account Role *</label>
+                            <select id="new-role" onchange="handleRoleChange(this.value)" required>
+                                <option value="worker">🔧 Maintenance Worker / Staff</option>
+                                <option value="warden">🛡️ Sub Warden</option>
+                                <option value="student">🎓 Student</option>
+                                <option value="admin">⚙️ Administrator</option>
+                            </select>
+                        </div>
+
+                        <!-- Trade Field: Shown when role is worker -->
+                        <div class="form-group full-width" id="worker-trade-group" style="background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1.5px solid #cbd5e1;">
+                            <label for="new-trade" style="color: #0369a1; font-weight: 700;">Worker Trade / Specialty *</label>
+                            <select id="new-trade" style="font-weight: 600;">
+                                <option value="plumber">🚿 Plumber (Water taps, pipes, bathroom leaks)</option>
+                                <option value="electrician">⚡ Electrician (Fans, lights, switches, wiring)</option>
+                                <option value="carpenter">🪚 Carpenter (Beds, tables, doors, locks)</option>
+                                <option value="mason">🧱 Mason (Walls, flooring, tiles)</option>
+                                <option value="general">🔧 General Repair</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new-phone">Phone Number</label>
+                            <input type="text" id="new-phone" placeholder="+94 78 555 6677">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-block">Hostel Block / Department</label>
+                            <input type="text" id="new-block" placeholder="e.g. Maintenance Workshop">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-room">Room / Office Number</label>
+                            <input type="text" id="new-room" placeholder="e.g. Room 102 / Workshop">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">Default Password *</label>
+                            <input type="password" id="new-password" value="password123" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAddUserModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitNewUser()">Save Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Admin Profile (Requirement 4) -->
+    <div id="admin-profile-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white;">
+                <h3 style="margin: 0; color: white;">👤 Edit Administrator Profile</h3>
+                <button class="modal-close" style="color: white;" onclick="closeAdminProfileModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 1.5rem;">
+                <div id="admin-profile-alert" style="display: none; padding: 0.65rem 0.9rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.88rem; font-weight: 700;"></div>
+                <form id="admin-profile-form" onsubmit="saveAdminProfileChanges(event)">
+                    <div class="form-group">
+                        <label for="admin-prof-fullname">Full Name *</label>
+                        <input type="text" id="admin-prof-fullname" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-prof-email">Email Address *</label>
+                        <input type="email" id="admin-prof-email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-prof-phone">Phone Number</label>
+                        <input type="text" id="admin-prof-phone" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-prof-password">Change Password (leave empty to keep current)</label>
+                        <input type="password" id="admin-prof-password" class="form-control" placeholder="••••••••">
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.25rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeAdminProfileModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); border: none; font-weight: 700;">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        const currentUser = Api.checkAuth(['admin']);
+        let allUsers = [];
+
+        if (currentUser) {
+            document.getElementById('user-display-name').innerText = currentUser.full_name;
+            loadUsers();
+            loadPortalEditorFields();
+            loadHistoryRequests();
+        }
+
+        // Tab Switching
+        function switchTab(tab) {
+            document.getElementById('pane-users').classList.toggle('active', tab === 'users');
+            document.getElementById('pane-content').classList.toggle('active', tab === 'content');
+            document.getElementById('pane-history').classList.toggle('active', tab === 'history');
+            document.getElementById('tab-btn-users').classList.toggle('active', tab === 'users');
+            document.getElementById('tab-btn-content').classList.toggle('active', tab === 'content');
+            document.getElementById('tab-btn-history').classList.toggle('active', tab === 'history');
+
+            if (tab === 'history') {
+                loadHistoryRequests();
+            }
+        }
+
+        function showAdminToast(msg, isSuccess = true) {
+            const toast = document.getElementById('admin-toast');
+            toast.style.display = 'block';
+            toast.innerText = msg;
+            toast.style.background = isSuccess ? '#ecfdf5' : '#fef2f2';
+            toast.style.color = isSuccess ? '#065f46' : '#991b1b';
+            toast.style.border = isSuccess ? '1.5px solid #a7f3d0' : '1.5px solid #fecaca';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 4500);
+        }
+
+        // -------------------------------------------------------------
+        // Users Management
+        // -------------------------------------------------------------
+        function loadUsers() {
+            allUsers = Api.getUsers();
+            updateStats();
+            filterUsers(document.getElementById('role-filter').value);
+        }
+
+        function updateStats() {
+            const allReqs = JSON.parse(localStorage.getItem('hostel_requests') || '[]');
+            document.getElementById('stat-users').innerText = allUsers.length;
+            document.getElementById('stat-students').innerText = allUsers.filter(u => u.role === 'student').length;
+            document.getElementById('stat-workers').innerText = allUsers.filter(u => u.role === 'worker').length;
+            document.getElementById('stat-requests').innerText = allReqs.length;
+        }
+
+        function filterUsers(role) {
+            const tbody = document.getElementById('admin-users-body');
+            const filtered = role === 'ALL' ? allUsers : allUsers.filter(u => u.role === role);
+
+            tbody.innerHTML = filtered.map(u => {
+                const roleClass = `role-tag ${u.role}`;
+                
+                let tradeBadge = '<span style="color:var(--text-muted);">-</span>';
+                if (u.role === 'worker' && u.worker_trade) {
+                    if (u.worker_trade === 'plumber') {
+                        tradeBadge = `<span class="trade-badge-plumber">🚿 Plumber</span>`;
+                    } else if (u.worker_trade === 'electrician') {
+                        tradeBadge = `<span class="trade-badge-electrician">⚡ Electrician</span>`;
+                    } else if (u.worker_trade === 'carpenter') {
+                        tradeBadge = `<span class="trade-badge-carpenter">🪚 Carpenter</span>`;
+                    } else {
+                        tradeBadge = `<span class="role-tag worker">${u.worker_trade.toUpperCase()}</span>`;
+                    }
+                }
+
+                return `
+                    <tr>
+                        <td><strong>#${u.id}</strong></td>
+                        <td>
+                            <strong style="color: #0f172a;">${u.full_name}</strong><br>
+                            <small style="color:var(--text-muted);">@${u.username}</small>
+                        </td>
+                        <td><span class="${roleClass}">${u.role}</span></td>
+                        <td>${tradeBadge}</td>
+                        <td>
+                            <div>${u.email}</div>
+                            <small style="color:var(--text-muted);">${u.phone || 'No phone'}</small>
+                        </td>
+                        <td>${u.hostel_block || '-'} / ${u.room_number || u.room_no || '-'}</td>
+                        <td><span class="badge badge-completed">${u.status || 'active'}</span></td>
+                        <td style="text-align: right;">
+                            ${u.id !== currentUser.id ? `<button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">Delete</button>` : '<small style="color:var(--text-muted); font-weight:700;">Current</small>'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function handleRoleChange(role) {
+            document.getElementById('worker-trade-group').style.display = role === 'worker' ? 'block' : 'none';
+        }
+
+        function openAddUserModal() {
+            document.getElementById('add-user-modal').style.display = 'flex';
+            handleRoleChange(document.getElementById('new-role').value);
+        }
+
+        function closeAddUserModal() {
+            document.getElementById('add-user-modal').style.display = 'none';
+        }
+
+        function submitNewUser() {
+            const role = document.getElementById('new-role').value;
+            const payload = {
+                username: document.getElementById('new-username').value.trim(),
+                email: document.getElementById('new-email').value.trim(),
+                full_name: document.getElementById('new-fullname').value.trim(),
+                role: role,
+                worker_trade: role === 'worker' ? document.getElementById('new-trade').value : 'none',
+                phone: document.getElementById('new-phone').value.trim(),
+                hostel_block: document.getElementById('new-block').value.trim(),
+                room_number: document.getElementById('new-room').value.trim(),
+                password: document.getElementById('new-password').value
+            };
+
+            if (!payload.username || !payload.email || !payload.full_name) {
+                alert('Please fill all required fields');
+                return;
+            }
+
+            Api.addUser(payload);
+            closeAddUserModal();
+            loadUsers();
+            showAdminToast(`✅ New account created successfully for ${payload.full_name} (${payload.role})!`);
+        }
+
+        function deleteUser(id) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                Api.deleteUser(id);
+                loadUsers();
+                showAdminToast('User deleted from system.');
+            }
+        }
+
+        // -------------------------------------------------------------
+        // Public Portal Content Editor Functions
+        // -------------------------------------------------------------
+        function loadPortalEditorFields() {
+            const content = Api.getPortalContent();
+            if (!content) return;
+
+            // Section 1: Showcase
+            if (content.facility_showcase) {
+                document.getElementById('ed-showcase-title').value = content.facility_showcase.title || '';
+                document.getElementById('ed-showcase-desc').value = content.facility_showcase.description || '';
+                document.getElementById('ed-showcase-elec').value = content.facility_showcase.electrical_text || '';
+                document.getElementById('ed-showcase-carp').value = content.facility_showcase.carpentry_text || '';
+                document.getElementById('ed-showcase-plumb').value = content.facility_showcase.plumbing_text || '';
+                document.getElementById('ed-showcase-caption').value = content.facility_showcase.image_caption || '';
+            }
+
+            // Section 2: User Roles
+            if (content.user_roles) {
+                document.getElementById('ed-roles-title').value = content.user_roles.title || '';
+                document.getElementById('ed-roles-subtitle').value = content.user_roles.subtitle || '';
+                document.getElementById('ed-role-student').value = content.user_roles.student_desc || '';
+                document.getElementById('ed-role-warden').value = content.user_roles.warden_desc || '';
+                document.getElementById('ed-role-worker').value = content.user_roles.worker_desc || '';
+                document.getElementById('ed-role-admin').value = content.user_roles.admin_desc || '';
+                document.getElementById('ed-role-guest').value = content.user_roles.guest_desc || '';
+            }
+
+            // Section 3: Guidelines
+            if (content.guidelines) {
+                document.getElementById('ed-guide-title').value = content.guidelines.title || '';
+                document.getElementById('ed-guide-safety').value = content.guidelines.safety_text || '';
+                document.getElementById('ed-guide-prohibited').value = content.guidelines.prohibited_text || '';
+                document.getElementById('ed-guide-attendance').value = content.guidelines.attendance_text || '';
+            }
+        }
+
+        function savePortalContent() {
+            const newContent = {
+                facility_showcase: {
+                    title: document.getElementById('ed-showcase-title').value.trim(),
+                    description: document.getElementById('ed-showcase-desc').value.trim(),
+                    electrical_text: document.getElementById('ed-showcase-elec').value.trim(),
+                    carpentry_text: document.getElementById('ed-showcase-carp').value.trim(),
+                    plumbing_text: document.getElementById('ed-showcase-plumb').value.trim(),
+                    image_caption: document.getElementById('ed-showcase-caption').value.trim()
+                },
+                user_roles: {
+                    title: document.getElementById('ed-roles-title').value.trim(),
+                    subtitle: document.getElementById('ed-roles-subtitle').value.trim(),
+                    student_desc: document.getElementById('ed-role-student').value.trim(),
+                    warden_desc: document.getElementById('ed-role-warden').value.trim(),
+                    worker_desc: document.getElementById('ed-role-worker').value.trim(),
+                    admin_desc: document.getElementById('ed-role-admin').value.trim(),
+                    guest_desc: document.getElementById('ed-role-guest').value.trim()
+                },
+                guidelines: {
+                    title: document.getElementById('ed-guide-title').value.trim(),
+                    safety_text: document.getElementById('ed-guide-safety').value.trim(),
+                    prohibited_text: document.getElementById('ed-guide-prohibited').value.trim(),
+                    attendance_text: document.getElementById('ed-guide-attendance').value.trim()
+                }
+            };
+
+            Api.updatePortalContent(newContent);
+            showAdminToast('🎉 Public Portal Content Updated Successfully! Open index.html to view live changes.');
+        }
+
+        function restoreDefaults() {
+            if (confirm('Reset all 3 public portal sections back to system defaults?')) {
+                Api.resetPortalContent();
+                loadPortalEditorFields();
+                showAdminToast('Portal content restored to system defaults.');
+            }
+        }
+
+        // -------------------------------------------------------------
+        // Maintenance History Archive (Requirement 6)
+        // -------------------------------------------------------------
+        function loadHistoryRequests() {
+            const history = Api.getRequestHistory();
+            const tbody = document.getElementById('admin-history-body');
+            document.getElementById('history-count-badge').innerText = `${history.length} Archived Jobs`;
+
+            if (history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">No archived maintenance jobs yet. Completed requests automatically move here after 7 days.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = history.map(r => {
+                const workerInfo = r.worker_name
+                    ? `<strong>${r.worker_name}</strong><br><small class="role-tag worker">${(r.worker_trade || 'Tech').toUpperCase()}</small>`
+                    : '<span style="color:var(--text-muted);">-</span>';
+
+                let starBadge = '<span style="color:var(--text-muted); font-size:0.85rem;">Not rated</span>';
+                if (r.rating) {
+                    starBadge = `
+                        <div style="background:#fef3c7; color:#b45309; padding:0.25rem 0.65rem; border-radius:12px; font-weight:800; font-size:0.85rem; border:1px solid #fde68a; display:inline-block;">
+                            ⭐ ${r.rating}/5 Stars
+                        </div>
+                        ${(r.student_feedback || r.feedback) ? `<div style="font-size:0.78rem; color:#475569; margin-top:0.2rem; font-style:italic;">"${r.student_feedback || r.feedback}"</div>` : ''}
+                    `;
+                }
+
+                return `
+                    <tr>
+                        <td><strong>${r.request_code}</strong></td>
+                        <td>
+                            <strong>${r.student_name || 'Student'}</strong><br>
+                            <small style="color:var(--text-muted);">${r.location}</small>
+                        </td>
+                        <td>
+                            <strong>[${r.category.toUpperCase()}] ${r.title}</strong>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">${r.description ? r.description.substring(0, 50) + '...' : ''}</div>
+                        </td>
+                        <td>${workerInfo}</td>
+                        <td>
+                            <div>📅 Scheduled: ${r.scheduled_date || 'N/A'}</div>
+                            <small style="color:#059669; font-weight:700;">✅ Completed: ${r.completed_at ? new Date(r.completed_at).toLocaleDateString() : 'Recorded'}</small>
+                        </td>
+                        <td>${starBadge}</td>
+                        <td>
+                            <span class="badge badge-completed">ARCHIVED</span>
+                            <div style="font-size:0.75rem; color:#64748b; margin-top:0.2rem;">Older than 7 days</div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // -------------------------------------------------------------
+        // Admin Profile Management (Requirement 4)
+        // -------------------------------------------------------------
+        function openAdminProfileModal() {
+            const user = Api.getCurrentUser();
+            if (!user) return;
+            document.getElementById('admin-prof-fullname').value = user.full_name || '';
+            document.getElementById('admin-prof-email').value = user.email || '';
+            document.getElementById('admin-prof-phone').value = user.phone || '';
+            document.getElementById('admin-prof-password').value = '';
+            document.getElementById('admin-profile-alert').style.display = 'none';
+            document.getElementById('admin-profile-modal').style.display = 'flex';
+        }
+
+        function closeAdminProfileModal() {
+            document.getElementById('admin-profile-modal').style.display = 'none';
+        }
+
+        async function saveAdminProfileChanges(e) {
+            e.preventDefault();
+            const user = Api.getCurrentUser();
+            if (!user) return;
+
+            const data = {
+                fullName: document.getElementById('admin-prof-fullname').value.trim(),
+                email: document.getElementById('admin-prof-email').value.trim(),
+                phone: document.getElementById('admin-prof-phone').value.trim(),
+                password: document.getElementById('admin-prof-password').value.trim()
+            };
+
+            const res = await Api.updateProfile(user.id, data);
+            const alertBox = document.getElementById('admin-profile-alert');
+            if (res && res.success) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = '#ecfdf5';
+                alertBox.style.color = '#065f46';
+                alertBox.innerText = '✅ Administrator profile updated successfully!';
+                
+                document.getElementById('user-display-name').innerText = res.user.full_name;
+                setTimeout(() => {
+                    closeAdminProfileModal();
+                    loadUsers();
+                }, 900);
+            } else {
+                alertBox.style.display = 'block';
+                alertBox.style.background = '#fef2f2';
+                alertBox.style.color = '#991b1b';
+                alertBox.innerText = res.message || 'Profile update failed.';
+            }
+        }
+    </script>
+</body>
+</html>

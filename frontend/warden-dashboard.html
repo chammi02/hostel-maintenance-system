@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sub Warden Dashboard - Hostel Maintenance System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .nav-tab-bar {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .nav-tab-btn {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 30px;
+            padding: 0.6rem 1.4rem;
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-tab-btn:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .nav-tab-btn.active {
+            background: #7c3aed;
+            color: #ffffff;
+            border-color: #7c3aed;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+
+        .section-pane {
+            display: none;
+        }
+        .section-pane.active {
+            display: block;
+        }
+
+        .star-badge-gold {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+            padding: 0.2rem 0.55rem;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="warden-dashboard.html" class="brand" style="display: flex; align-items: center;">
+            <img src="images/uom_logo.png" alt="Logo" style="width: 32px; height: auto; margin-right: 8px;">
+            <span>HostelFix | Sub Warden Portal</span>
+        </a>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div class="user-badge" style="background: #f5f3ff; border-color: #ddd6fe;">
+                <span id="user-display-name" style="color: #6b21a8; font-weight: 700;">Sub Warden</span>
+                <span class="role-tag warden" style="background: #7c3aed; color: white;">Warden</span>
+            </div>
+            <!-- Staff Account Management: Warden can edit profile -->
+            <button class="btn btn-secondary btn-sm" onclick="openProfileModal()" style="border-radius: 20px; font-weight: 700; background: #eff6ff; color: #1e40af; border-color: #bfdbfe;">
+                👤 Edit Profile
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="Api.logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div>
+                <h1>Sub Warden Request Management</h1>
+                <p>Review incoming requests, verify hostel policy compliance, and assign jobs to suitable technicians</p>
+            </div>
+        </div>
+
+        <!-- Tab Bar: Active Requests vs Archived History -->
+        <div class="nav-tab-bar">
+            <button class="nav-tab-btn active" id="tab-btn-active" onclick="switchWardenTab('active')">
+                📋 Active Maintenance Requests
+            </button>
+            <button class="nav-tab-btn" id="tab-btn-history" onclick="switchWardenTab('history')">
+                📜 Maintenance Request History (Completed Past 7+ Days)
+            </button>
+        </div>
+
+        <!-- PANE 1: ACTIVE REQUESTS -->
+        <div id="pane-active" class="section-pane active">
+            <!-- Fixed & Balanced KPI Summary Cards (All Math Perfectly Aligned) -->
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+                <div class="stat-card" style="border-top: 4px solid #3b82f6;">
+                    <div class="stat-info">
+                        <h3 id="stat-total">0</h3>
+                        <span>Total Active</span>
+                    </div>
+                    <div class="stat-icon blue">📋</div>
+                </div>
+                <div class="stat-card" style="border-top: 4px solid #f59e0b;">
+                    <div class="stat-info">
+                        <h3 id="stat-pending">0</h3>
+                        <span>Pending Review</span>
+                    </div>
+                    <div class="stat-icon yellow">⏳</div>
+                </div>
+                <div class="stat-card" style="border-top: 4px solid #2563eb;">
+                    <div class="stat-info">
+                        <h3 id="stat-under-review">0</h3>
+                        <span>Under Review</span>
+                    </div>
+                    <div class="stat-icon blue">🔍</div>
+                </div>
+                <div class="stat-card" style="border-top: 4px solid #8b5cf6;">
+                    <div class="stat-info">
+                        <h3 id="stat-scheduled">0</h3>
+                        <span>Scheduled / Assigned</span>
+                    </div>
+                    <div class="stat-icon purple">📅</div>
+                </div>
+                <div class="stat-card" style="border-top: 4px solid #10b981;">
+                    <div class="stat-info">
+                        <h3 id="stat-completed">0</h3>
+                        <span>Completed (&lt; 7 Days)</span>
+                    </div>
+                    <div class="stat-icon green">✅</div>
+                </div>
+                <div class="stat-card" style="border-top: 4px solid #ef4444;">
+                    <div class="stat-info">
+                        <h3 id="stat-rejected">0</h3>
+                        <span>Rejected</span>
+                    </div>
+                    <div class="stat-icon" style="background: #fee2e2; color: #dc2626;">🚫</div>
+                </div>
+                <div class="stat-card" style="border-top: 4px solid #64748b;">
+                    <div class="stat-info">
+                        <h3 id="stat-history">0</h3>
+                        <span>Archived History</span>
+                    </div>
+                    <div class="stat-icon" style="background: #f1f5f9; color: #475569;">📜</div>
+                </div>
+            </div>
+
+            <!-- Active Requests Table -->
+            <div class="card" style="margin-top: 1.5rem;">
+                <div class="card-header" style="background: #f8fafc;">
+                    <h2>Active Maintenance Requests</h2>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <label for="status-filter" style="margin-bottom: 0; font-size: 0.85rem; font-weight: 700;">Filter:</label>
+                        <select id="status-filter" onchange="filterRequests(this.value)" style="padding: 0.35rem 0.6rem; font-size: 0.85rem; width: auto; border-radius: 8px; border: 1.5px solid #cbd5e1;">
+                            <option value="ALL">Show All Active</option>
+                            <option value="PENDING_REVIEW">Pending Review</option>
+                            <option value="UNDER_REVIEW">Under Review</option>
+                            <option value="ASSIGNED">Assigned</option>
+                            <option value="SCHEDULED">Scheduled</option>
+                            <option value="COMPLETED">Completed (&lt; 7 Days)</option>
+                            <option value="REJECTED">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Student &amp; Room</th>
+                                    <th>Category &amp; Issue</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Assigned Worker</th>
+                                    <th>Schedule Date/Time</th>
+                                    <th style="text-align: right;">Workflow Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="warden-requests-body">
+                                <tr><td colspan="8" style="text-align:center; padding: 2rem;">Loading requests...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANE 2: REQUEST HISTORY (ARCHIVED COMPLETED > 7 DAYS) -->
+        <div id="pane-history" class="section-pane">
+            <div style="background: #f8fafc; border-left: 4px solid #7c3aed; padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <strong style="color: #6b21a8; font-size: 1.05rem;">📜 Maintenance Request History (Archive)</strong>
+                <p style="color: #475569; margin: 0.25rem 0 0 0; font-size: 0.92rem;">
+                    Per system policy, completed requests older than 7 days are automatically archived here. Only Administrators and Sub Wardens have access to this past maintenance audit trail.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-header" style="background: #f8fafc;">
+                    <h2>Completed Requests History &amp; Student Ratings</h2>
+                    <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">
+                        Restricted Access: Sub Warden &amp; Admin
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Student &amp; Room</th>
+                                    <th>Category &amp; Issue</th>
+                                    <th>Completed Date</th>
+                                    <th>Technician</th>
+                                    <th>Student Rating &amp; Review</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="warden-history-body">
+                                <tr><td colspan="7" style="text-align:center; padding: 2rem;">Loading history archive...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Assign Worker -->
+    <div id="assign-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a, #7c3aed); color: white;">
+                <h3 style="color: white; margin: 0;">🛠️ Assign Maintenance Worker</h3>
+                <button class="modal-close" onclick="closeAssignModal()" style="color: white;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="assign-req-summary" style="margin-bottom: 1rem; font-weight: 600; color: #1e3a8a;"></p>
+                <input type="hidden" id="assign-req-id">
+                <div class="form-group">
+                    <label for="worker-select" style="font-weight: 700; color: #334155;">Select Suitable Technician / Worker *</label>
+                    <select id="worker-select" required style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1.5px solid #cbd5e1;"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAssignModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmAssignment()" style="background: #7c3aed; border-color: #7c3aed;">Confirm Assignment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Reject Request -->
+    <div id="reject-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #dc2626; color: white;">
+                <h3 style="color: white; margin: 0;">❌ Reject Maintenance Request</h3>
+                <button class="modal-close" onclick="closeRejectModal()" style="color: white;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="reject-req-id">
+                <p style="margin-bottom: 0.75rem; color: #b91c1c; font-size: 0.9rem; font-weight: 600;">
+                    Please state the official hostel policy reason for rejecting this request:
+                </p>
+                <div class="form-group">
+                    <label for="reject-reason" style="font-weight: 700; color: #334155;">Rejection Reason *</label>
+                    <textarea id="reject-reason" placeholder="e.g. Unauthorized appliance or private modification not allowed per hostel rule 4.2" required style="width: 100%; min-height: 80px; padding: 0.65rem; border: 1.5px solid #cbd5e1; border-radius: 8px;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeRejectModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="confirmRejection()">Reject Request</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Staff Edit Profile (Sub Warden Account Management) -->
+    <div id="warden-profile-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a, #7c3aed); color: white;">
+                <h3 style="color: white; margin: 0;">👤 Edit Sub Warden Account Details</h3>
+                <button class="modal-close" onclick="closeProfileModal()" style="color: white;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="profile-alert" style="display:none; padding: 0.65rem 1rem; border-radius: 8px; font-weight: 700; font-size: 0.88rem; margin-bottom: 1rem;"></div>
+                <form id="warden-profile-form" onsubmit="saveProfileChanges(event)">
+                    <div class="form-group">
+                        <label for="prof-fullname" style="font-weight: 700;">Full Name *</label>
+                        <input type="text" id="prof-fullname" required style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1.5px solid #cbd5e1;">
+                    </div>
+                    <div class="form-group">
+                        <label for="prof-email" style="font-weight: 700;">Official Email *</label>
+                        <input type="email" id="prof-email" required style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1.5px solid #cbd5e1;">
+                    </div>
+                    <div class="form-group">
+                        <label for="prof-phone" style="font-weight: 700;">Phone Number</label>
+                        <input type="text" id="prof-phone" placeholder="+94 71 222 3344" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1.5px solid #cbd5e1;">
+                    </div>
+                    <div class="form-group">
+                        <label for="prof-dept" style="font-weight: 700;">Office Location / Department</label>
+                        <input type="text" id="prof-dept" placeholder="Warden Office, Block A" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1.5px solid #cbd5e1;">
+                    </div>
+                    <div class="form-group">
+                        <label for="prof-password" style="font-weight: 700;">New Password (Optional)</label>
+                        <input type="password" id="prof-password" placeholder="Leave blank to keep current password" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1.5px solid #cbd5e1;">
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeProfileModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="background: #7c3aed; border-color: #7c3aed;">Save Profile Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        const currentUser = Api.checkAuth(['warden', 'admin']);
+        let allRequests = [];
+        let historyRequests = [];
+        let workersList = [];
+
+        if (currentUser) {
+            document.getElementById('user-display-name').innerText = currentUser.full_name;
+            workersList = Api.getWorkers();
+            loadWardenRequests();
+        }
+
+        function switchWardenTab(tab) {
+            document.getElementById('pane-active').classList.toggle('active', tab === 'active');
+            document.getElementById('pane-history').classList.toggle('active', tab === 'history');
+            document.getElementById('tab-btn-active').classList.toggle('active', tab === 'active');
+            document.getElementById('tab-btn-history').classList.toggle('active', tab === 'history');
+            if (tab === 'history') renderHistoryTable();
+        }
+
+        async function loadWardenRequests() {
+            // Automatically excludes completed requests older than 7 days
+            allRequests = await Api.getWardenRequests(false);
+            historyRequests = Api.getRequestHistory().filter(r => Api.isOlderThan7Days(r));
+            updateStats();
+            filterRequests(document.getElementById('status-filter').value);
+        }
+
+        // 100% Balanced Request Counters Fix
+        function updateStats() {
+            const totalActive = allRequests.length;
+            const pending = allRequests.filter(r => r.status === 'PENDING_REVIEW').length;
+            const underReview = allRequests.filter(r => r.status === 'UNDER_REVIEW').length;
+            const scheduled = allRequests.filter(r => ['ASSIGNED', 'SCHEDULED'].includes(r.status)).length;
+            const completed = allRequests.filter(r => r.status === 'COMPLETED').length;
+            const rejected = allRequests.filter(r => r.status === 'REJECTED').length;
+
+            document.getElementById('stat-total').innerText = totalActive;
+            document.getElementById('stat-pending').innerText = pending;
+            document.getElementById('stat-under-review').innerText = underReview;
+            document.getElementById('stat-scheduled').innerText = scheduled;
+            document.getElementById('stat-completed').innerText = completed;
+            document.getElementById('stat-rejected').innerText = rejected;
+            document.getElementById('stat-history').innerText = historyRequests.length;
+        }
+
+        function filterRequests(status) {
+            const tbody = document.getElementById('warden-requests-body');
+            const filtered = status === 'ALL' ? allRequests : allRequests.filter(r => r.status === status);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 2rem; color: var(--text-muted);">No requests matching selected status.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(r => {
+                const badgeClass = `badge-${r.status.toLowerCase()}`;
+                
+                let tradeDisplay = '<span style="color:var(--text-muted);">None</span>';
+                if (r.worker_name) {
+                    let icon = '🔧';
+                    if (r.worker_trade === 'plumber') icon = '🚿';
+                    else if (r.worker_trade === 'electrician') icon = '⚡';
+                    else if (r.worker_trade === 'carpenter') icon = '🪚';
+
+                    tradeDisplay = `<strong style="color: #0f172a;">${r.worker_name}</strong><br><span class="role-tag worker" style="text-transform: capitalize;">${icon} ${r.worker_trade || 'Staff'}</span>`;
+                }
+
+                let ratingBadge = '';
+                if (r.status === 'COMPLETED') {
+                    if (r.rating) {
+                        ratingBadge = `<div style="margin-top:0.35rem;"><span class="star-badge-gold">⭐ ${r.rating}/5 Rated</span></div>`;
+                    } else {
+                        ratingBadge = `<div style="margin-top:0.35rem;"><small style="color:var(--text-muted);">Awaiting Rating</small></div>`;
+                    }
+                }
+
+                let actionButtons = '';
+                if (r.status === 'PENDING_REVIEW') {
+                    actionButtons = `
+                        <button class="btn btn-primary btn-sm" onclick="markUnderReview(${r.id})" style="background: #2563eb;">🔍 Review</button>
+                        <button class="btn btn-danger btn-sm" onclick="openRejectModal(${r.id})">❌ Reject</button>
+                    `;
+                } else if (r.status === 'UNDER_REVIEW') {
+                    actionButtons = `
+                        <button class="btn btn-primary btn-sm" onclick="openAssignModal(${r.id})" style="background: #7c3aed; border-color: #7c3aed;">🛠️ Assign Staff</button>
+                        <button class="btn btn-danger btn-sm" onclick="openRejectModal(${r.id})">❌ Reject</button>
+                    `;
+                } else if (r.status === 'ASSIGNED') {
+                    actionButtons = `<span style="font-size:0.8rem; color:#7c3aed; font-weight:700;">⏳ Awaiting Worker Schedule</span>`;
+                } else if (r.status === 'SCHEDULED') {
+                    actionButtons = `<span style="font-size:0.8rem; color:#0e7490; font-weight:700;">📅 Scheduled</span>`;
+                } else if (r.status === 'COMPLETED') {
+                    actionButtons = `<span style="font-size:0.8rem; color:#059669; font-weight:700;">✅ Resolved (&lt; 7d)</span>`;
+                } else if (r.status === 'REJECTED') {
+                    actionButtons = `<span style="font-size:0.8rem; color:#dc2626; font-weight:700;">🚫 Rejected</span>`;
+                }
+
+                let catIcon = '🔧';
+                if (r.category === 'electrical') catIcon = '⚡';
+                else if (r.category === 'carpentry') catIcon = '🪚';
+                else if (r.category === 'plumbing') catIcon = '🚿';
+
+                return `
+                    <tr>
+                        <td><strong>${r.request_code}</strong></td>
+                        <td>
+                            <strong>${r.student_name || 'Student'}</strong><br>
+                            <small style="color:var(--text-muted);">${r.location || r.student_room}</small>
+                        </td>
+                        <td>
+                            <strong style="text-transform: capitalize;">${catIcon} [${r.category}]</strong> ${r.title}
+                            <div style="font-size:0.8rem; color:var(--text-muted);">${r.description ? r.description.substring(0, 50) + '...' : ''}</div>
+                        </td>
+                        <td><span style="font-weight:600; text-transform:capitalize;">${r.priority}</span></td>
+                        <td>
+                            <span class="badge ${badgeClass}">${r.status.replace('_', ' ')}</span>
+                            ${ratingBadge}
+                        </td>
+                        <td>${tradeDisplay}</td>
+                        <td>${r.scheduled_date ? `<strong style="color:#0e7490;">${r.scheduled_date}</strong><br><small>${r.scheduled_time || ''}</small>` : '<span style="color:var(--text-muted);">-</span>'}</td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            ${actionButtons}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Render History Table (> 7 Days Completed)
+        function renderHistoryTable() {
+            const tbody = document.getElementById('warden-history-body');
+            const history = Api.getRequestHistory();
+
+            if (history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem; color: var(--text-muted);">No archived request records found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = history.map(r => {
+                const stars = r.rating ? `<span class="star-badge-gold">⭐ ${r.rating}/5.0</span>` : '<span style="color:var(--text-muted);">Not rated</span>';
+                const feedback = r.student_feedback ? `<div style="font-size:0.82rem; color:#475569; font-style:italic;">“${r.student_feedback}”</div>` : '';
+                const compDate = r.completed_at || r.scheduled_date || 'Past Record';
+                const older7Tag = Api.isOlderThan7Days(r) 
+                    ? `<span style="background:#f1f5f9; color:#475569; padding:0.15rem 0.5rem; border-radius:10px; font-size:0.75rem; font-weight:700;">&gt; 7 Days Archived</span>`
+                    : `<span style="background:#ecfdf5; color:#065f46; padding:0.15rem 0.5rem; border-radius:10px; font-size:0.75rem; font-weight:700;">Recent (&lt; 7d)</span>`;
+
+                return `
+                    <tr>
+                        <td><strong>${r.request_code}</strong></td>
+                        <td>
+                            <strong>${r.student_name}</strong><br>
+                            <small style="color:var(--text-muted);">${r.location || r.student_room}</small>
+                        </td>
+                        <td>
+                            <strong style="text-transform: capitalize;">[${r.category}]</strong> ${r.title}
+                        </td>
+                        <td>
+                            <strong>${compDate}</strong><br>
+                            ${older7Tag}
+                        </td>
+                        <td>
+                            <strong>${r.worker_name || 'Staff'}</strong><br>
+                            <small class="role-tag worker">${r.worker_trade || 'Trade'}</small>
+                        </td>
+                        <td>
+                            ${stars}
+                            ${feedback}
+                        </td>
+                        <td><span class="badge badge-completed">COMPLETED</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function markUnderReview(id) {
+            await Api.reviewRequest(id);
+            await loadWardenRequests();
+        }
+
+        function openAssignModal(id) {
+            const req = allRequests.find(r => r.id === id);
+            if (!req) return;
+
+            document.getElementById('assign-req-id').value = id;
+            document.getElementById('assign-req-summary').innerText = `Assigning: ${req.request_code} - ${req.title} (${req.category})`;
+
+            const select = document.getElementById('worker-select');
+            select.innerHTML = workersList.map(w => {
+                const match = w.worker_trade === req.category ? '⭐ Recommended: ' : '';
+                return `<option value="${w.id}">${match}${w.full_name} (${w.worker_trade.toUpperCase()}) - ${w.phone || ''}</option>`;
+            }).join('');
+
+            document.getElementById('assign-modal').style.display = 'flex';
+        }
+
+        function closeAssignModal() {
+            document.getElementById('assign-modal').style.display = 'none';
+        }
+
+        async function confirmAssignment() {
+            const reqId = Number(document.getElementById('assign-req-id').value);
+            const workerId = Number(document.getElementById('worker-select').value);
+
+            await Api.assignWorker(reqId, workerId);
+            closeAssignModal();
+            await loadWardenRequests();
+        }
+
+        function openRejectModal(id) {
+            document.getElementById('reject-req-id').value = id;
+            document.getElementById('reject-reason').value = '';
+            document.getElementById('reject-modal').style.display = 'flex';
+        }
+
+        function closeRejectModal() {
+            document.getElementById('reject-modal').style.display = 'none';
+        }
+
+        async function confirmRejection() {
+            const reqId = Number(document.getElementById('reject-req-id').value);
+            const reason = document.getElementById('reject-reason').value.trim();
+
+            if (!reason) {
+                alert('Please state a reason for rejection.');
+                return;
+            }
+
+            await Api.rejectRequest(reqId, reason);
+            closeRejectModal();
+            await loadWardenRequests();
+        }
+
+        // Sub Warden Profile Management
+        function openProfileModal() {
+            const user = Api.getCurrentUser();
+            if (!user) return;
+            document.getElementById('prof-fullname').value = user.full_name || '';
+            document.getElementById('prof-email').value = user.email || '';
+            document.getElementById('prof-phone').value = user.phone || '';
+            document.getElementById('prof-dept').value = user.department || 'Warden Office';
+            document.getElementById('prof-password').value = '';
+            document.getElementById('profile-alert').style.display = 'none';
+            document.getElementById('warden-profile-modal').style.display = 'flex';
+        }
+
+        function closeProfileModal() {
+            document.getElementById('warden-profile-modal').style.display = 'none';
+        }
+
+        async function saveProfileChanges(e) {
+            e.preventDefault();
+            const user = Api.getCurrentUser();
+            if (!user) return;
+
+            const data = {
+                fullName: document.getElementById('prof-fullname').value.trim(),
+                email: document.getElementById('prof-email').value.trim(),
+                phone: document.getElementById('prof-phone').value.trim(),
+                department: document.getElementById('prof-dept').value.trim(),
+                password: document.getElementById('prof-password').value.trim()
+            };
+
+            const res = await Api.updateProfile(user.id, data);
+            const alertBox = document.getElementById('profile-alert');
+            if (res && res.success) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = '#ecfdf5';
+                alertBox.style.color = '#065f46';
+                alertBox.innerText = '✅ Account details updated successfully!';
+                document.getElementById('user-display-name').innerText = res.user.full_name;
+                setTimeout(() => closeProfileModal(), 900);
+            } else {
+                alertBox.style.display = 'block';
+                alertBox.style.background = '#fef2f2';
+                alertBox.style.color = '#991b1b';
+                alertBox.innerText = res.message || 'Update failed.';
+            }
+        }
+    </script>
+</body>
+</html>
